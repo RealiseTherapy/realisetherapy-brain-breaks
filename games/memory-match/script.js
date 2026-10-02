@@ -4,10 +4,12 @@ let gameState = {
     flipped: [],
     matched: [],
     moves: 0,
-    score: 0,
     hintCount: 3,
     isProcessing: false,
-    difficulty: 'medium'
+    difficulty: 'medium',
+    teams: [],
+    currentTeamIndex: 0,
+    teamScores: {}
 };
 
 // Emoji sets for different themes
@@ -18,34 +20,103 @@ const emojiSets = {
     sports: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸', '🏒', '🏑', '⛳', '🎿', '🏂']
 };
 
+const teamColors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F',
+    '#BB8FCE', '#85C1E2', '#F8B88B', '#85E7D7'
+];
+
 const difficultySettings = {
     easy: 8,
     medium: 12,
     hard: 16
 };
 
-// Initialize game
-function init() {
-    gameState.difficulty = document.getElementById('difficulty').value;
-    const pairCount = difficultySettings[gameState.difficulty];
+// Initialize team setup screen
+function initSetupScreen() {
+    updateTeamDisplay();
     
-    gameState.cards = [];
+    document.getElementById('decreaseTeamsBtn').addEventListener('click', decreaseTeams);
+    document.getElementById('increaseTeamsBtn').addEventListener('click', increaseTeams);
+    document.getElementById('startGameBtn').addEventListener('click', startGame);
+}
+
+// Update team count display
+function updateTeamDisplay() {
+    const teamCount = parseInt(document.getElementById('teamCount').textContent);
+    gameState.teams = [];
+    gameState.teamScores = {};
+
+    for (let i = 1; i <= teamCount; i++) {
+        const teamName = `Team ${i}`;
+        gameState.teams.push(teamName);
+        gameState.teamScores[teamName] = 0;
+    }
+
+    // Render team list
+    const teamList = document.getElementById('teamList');
+    teamList.innerHTML = '';
+    
+    gameState.teams.forEach((team, index) => {
+        const teamItem = document.createElement('div');
+        teamItem.className = 'team-item';
+        teamItem.textContent = team;
+        teamItem.style.borderLeftColor = teamColors[index % teamColors.length];
+        teamList.appendChild(teamItem);
+    });
+
+    // Update button states
+    document.getElementById('decreaseTeamsBtn').disabled = gameState.teams.length <= 1;
+    document.getElementById('increaseTeamsBtn').disabled = gameState.teams.length >= 10;
+}
+
+// Decrease number of teams
+function decreaseTeams() {
+    const teamCountEl = document.getElementById('teamCount');
+    const currentCount = parseInt(teamCountEl.textContent);
+    if (currentCount > 1) {
+        teamCountEl.textContent = currentCount - 1;
+        updateTeamDisplay();
+    }
+}
+
+// Increase number of teams
+function increaseTeams() {
+    const teamCountEl = document.getElementById('teamCount');
+    const currentCount = parseInt(teamCountEl.textContent);
+    if (currentCount < 10) {
+        teamCountEl.textContent = currentCount + 1;
+        updateTeamDisplay();
+    }
+}
+
+// Start the game
+function startGame() {
+    gameState.difficulty = document.getElementById('difficulty').value;
+    gameState.currentTeamIndex = 0;
+    gameState.moves = 0;
     gameState.flipped = [];
     gameState.matched = [];
-    gameState.moves = 0;
-    gameState.score = 0;
     gameState.hintCount = 3;
     gameState.isProcessing = false;
 
-    // Generate card pairs with random emoji set
+    // Reset team scores
+    gameState.teams.forEach(team => {
+        gameState.teamScores[team] = 0;
+    });
+
+    // Generate cards
+    const pairCount = difficultySettings[gameState.difficulty];
     const emojiSet = Object.values(emojiSets)[Math.floor(Math.random() * Object.keys(emojiSets).length)];
     const selectedEmojis = emojiSet.slice(0, pairCount);
-    
     gameState.cards = [...selectedEmojis, ...selectedEmojis].sort(() => Math.random() - 0.5);
 
-    updateStats();
+    // Switch screens
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'block';
+
     renderBoard();
-    updateHintButton();
+    updateScoreboard();
+    updateGameInfo();
 }
 
 // Render the game board
@@ -86,7 +157,7 @@ function flipCard(index) {
 
     gameState.flipped.push(index);
     gameState.moves++;
-    updateStats();
+    updateGameInfo();
     renderBoard();
 
     // Check if we have 2 cards flipped
@@ -103,23 +174,88 @@ function checkMatch() {
 
     setTimeout(() => {
         if (isMatch) {
-            // Match found!
+            // Match found! Current team scores
             gameState.matched.push(first, second);
-            gameState.score += 10;
+            const currentTeam = gameState.teams[gameState.currentTeamIndex];
+            gameState.teamScores[currentTeam]++;
 
             // Check if game is won
             if (gameState.matched.length === gameState.cards.length) {
                 setTimeout(() => {
-                    alert(`🎉 You won!\n\nScore: ${gameState.score}\nMoves: ${gameState.moves}\n\nWell done! 👏`);
+                    announceWinner();
                 }, 300);
             }
+        } else {
+            // No match, switch to next team
+            gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
         }
 
         gameState.flipped = [];
         gameState.isProcessing = false;
-        updateStats();
+        updateGameInfo();
+        updateScoreboard();
         renderBoard();
     }, 1000);
+}
+
+// Announce the winner
+function announceWinner() {
+    let maxScore = Math.max(...Object.values(gameState.teamScores));
+    let winners = Object.entries(gameState.teamScores)
+        .filter(([_, score]) => score === maxScore)
+        .map(([team, _]) => team);
+
+    let message = '🎉 Game Over! 🎉\n\n';
+    
+    if (winners.length === 1) {
+        message += `${winners[0]} wins! 🏆\n`;
+    } else {
+        message += `It's a tie between:\n${winners.join(', ')}\n`;
+    }
+
+    message += `\nFinal Scores:\n`;
+    gameState.teams.forEach(team => {
+        message += `${team}: ${gameState.teamScores[team]} pairs\n`;
+    });
+
+    message += `\nTotal Moves: ${gameState.moves}`;
+
+    alert(message);
+}
+
+// Update scoreboard display
+function updateScoreboard() {
+    const scoreboard = document.getElementById('scoreboard');
+    scoreboard.innerHTML = '';
+
+    gameState.teams.forEach((team, index) => {
+        const card = document.createElement('div');
+        card.className = 'team-score-card';
+        if (index === gameState.currentTeamIndex) {
+            card.classList.add('active');
+        }
+
+        card.innerHTML = `
+            <div class="team-name">${team}</div>
+            <div class="team-score">${gameState.teamScores[team]}</div>
+        `;
+        card.style.borderColor = teamColors[index % teamColors.length];
+        scoreboard.appendChild(card);
+    });
+
+    // Update current team indicator
+    const indicator = document.getElementById('currentTeamIndicator');
+    const currentTeam = gameState.teams[gameState.currentTeamIndex];
+    indicator.innerHTML = `
+        <div class="current-team-text">Current Team</div>
+        <div class="current-team-name" style="color: ${teamColors[gameState.currentTeamIndex % teamColors.length]}">${currentTeam}</div>
+    `;
+}
+
+// Update game info display
+function updateGameInfo() {
+    document.getElementById('moves').textContent = gameState.moves;
+    document.getElementById('matches').textContent = gameState.matched.length / 2;
 }
 
 // Show a hint
@@ -138,7 +274,8 @@ function showHint() {
         const hintIndex = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
         gameState.flipped.push(hintIndex);
         gameState.hintCount--;
-        updateHintButton();
+        document.getElementById('hintBtn').textContent = `Hint (${gameState.hintCount} left)`;
+        document.getElementById('hintBtn').disabled = gameState.hintCount <= 0;
         renderBoard();
 
         setTimeout(() => {
@@ -148,24 +285,15 @@ function showHint() {
     }
 }
 
-// Update statistics display
-function updateStats() {
-    document.getElementById('moves').textContent = gameState.moves;
-    document.getElementById('score').textContent = gameState.score;
-    document.getElementById('matches').textContent = gameState.matched.length / 2;
-}
-
-// Update hint button text
-function updateHintButton() {
-    const hintBtn = document.getElementById('hintBtn');
-    hintBtn.textContent = `Hint (${gameState.hintCount} left)`;
-    hintBtn.disabled = gameState.hintCount <= 0;
+// Reset to setup screen
+function resetToSetup() {
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('setupScreen').style.display = 'flex';
 }
 
 // Event Listeners
-document.getElementById('resetBtn').addEventListener('click', init);
+document.getElementById('resetBtn').addEventListener('click', resetToSetup);
 document.getElementById('hintBtn').addEventListener('click', showHint);
-document.getElementById('difficulty').addEventListener('change', init);
 
 // Initialize on page load
-window.addEventListener('load', init);
+window.addEventListener('load', initSetupScreen);
