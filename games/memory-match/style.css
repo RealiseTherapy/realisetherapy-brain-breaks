@@ -318,15 +318,13 @@ h3 {
     user-select: none;
     padding: 0;
     flex-shrink: 0;
+    color: white;
+    font-weight: 700;
 }
 
-.card:hover:not(.matched):not(.flipped) {
-    transform: scale(1.05);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
-}
-
-.card:active:not(.matched):not(.flipped) {
-    transform: scale(0.98);
+.card:not(.flipped):not(.matched) {
+    color: white;
+    font-weight: 700;
 }
 
 .card.flipped {
