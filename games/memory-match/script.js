@@ -5,10 +5,11 @@ let gameState = {
     matched: [],
     moves: 0,
     isProcessing: false,
-    difficulty: 'medium',
+    difficulty: 'easy',
     teams: [],
     currentTeamIndex: 0,
-    teamScores: {}
+    teamScores: {},
+    cardTeams: {} // Track which team found each card
 };
 
 // Emoji sets for different themes
@@ -32,6 +33,12 @@ const difficultySettings = {
 
 // Initialize team setup screen
 function initSetupScreen() {
+    // Set default difficulty to easy
+    const difficultySelect = document.getElementById('difficulty');
+    if (difficultySelect) {
+        difficultySelect.value = 'easy';
+    }
+    
     updateTeamDisplay();
     
     document.getElementById('decreaseTeamsBtn').addEventListener('click', decreaseTeams);
@@ -101,6 +108,7 @@ function startGame() {
     gameState.flipped = [];
     gameState.matched = [];
     gameState.isProcessing = false;
+    gameState.cardTeams = {};
     gameState.teams = gameState.teams.length ? gameState.teams : ['Team 1', 'Team 2'];
 
     // Reset team scores
@@ -139,12 +147,20 @@ function renderBoard() {
             card.textContent = emoji;
             card.classList.add('flipped');
         } else {
-            card.textContent = '❓';
+            // Show card number instead of question mark
+            card.textContent = index + 1;
         }
 
         if (gameState.matched.includes(index)) {
             card.classList.add('matched');
             card.disabled = true;
+            
+            // Apply the team color that found this card
+            const teamIndex = gameState.cardTeams[index];
+            if (teamIndex !== undefined) {
+                card.style.backgroundColor = teamColors[teamIndex % teamColors.length];
+                card.style.backgroundImage = 'none';
+            }
         }
 
         card.addEventListener('click', () => flipCard(index));
@@ -182,6 +198,10 @@ function checkMatch() {
             gameState.matched.push(first, second);
             const currentTeam = gameState.teams[gameState.currentTeamIndex];
             gameState.teamScores[currentTeam]++;
+            
+            // Track which team found these cards
+            gameState.cardTeams[first] = gameState.currentTeamIndex;
+            gameState.cardTeams[second] = gameState.currentTeamIndex;
 
             // Check if game is won
             if (gameState.matched.length === gameState.cards.length) {
@@ -248,6 +268,7 @@ function updateScoreboard() {
             <div class="team-score">${gameState.teamScores[team]}</div>
         `;
         card.style.borderColor = teamColors[index % teamColors.length];
+        card.style.borderWidth = '3px';
         scoreboard.appendChild(card);
     });
 
@@ -282,6 +303,7 @@ function resetToSetup() {
     gameState.cards = [];
     gameState.moves = 0;
     gameState.isProcessing = false;
+    gameState.cardTeams = {};
     updateGameInfo();
 }
 
