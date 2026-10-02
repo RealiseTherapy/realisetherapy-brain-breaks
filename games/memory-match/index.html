@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match - Brain Breaks</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../" class="back-button">← Back</a>
+            <h1>🧠 Memory Match</h1>
+        </div>
+
+        <!-- Setup Screen -->
+        <div class="setup-screen" id="setupScreen">
+            <div class="setup-content">
+                <h2>Set Up Your Game</h2>
+                
+                <div class="setup-section">
+                    <label for="difficulty">Game Difficulty:</label>
+                    <select id="difficulty">
+                        <option value="easy">Easy (8 pairs)</option>
+                        <option value="medium" selected>Medium (12 pairs)</option>
+                        <option value="hard">Hard (16 pairs)</option>
+                    </select>
+                </div>
+
+                <div class="setup-section">
+                    <label>Number of Teams:</label>
+                    <div class="team-controls">
+                        <button class="btn btn-small" id="decreaseTeamsBtn">−</button>
+                        <span class="team-count" id="teamCount">2</span>
+                        <button class="btn btn-small" id="increaseTeamsBtn">+</button>
+                    </div>
+                </div>
+
+                <div class="team-list" id="teamList">
+                    <!-- Teams will be generated here -->
+                </div>
+
+                <button class="btn btn-primary" id="startGameBtn">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen" style="display: none;">
+            <div class="scoreboard" id="scoreboard">
+                <!-- Team scores will be displayed here -->
+            </div>
+
+            <div class="current-team-indicator" id="currentTeamIndicator">
+                <!-- Current team will be shown here -->
+            </div>
+
+            <div class="game-info">
+                <div class="info-item">
+                    <span class="info-label">Pairs Found</span>
+                    <span class="info-value" id="matches">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total Moves</span>
+                    <span class="info-value" id="moves">0</span>
+                </div>
+            </div>
+
+            <div class="game-board" id="gameBoard"></div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="hintBtn">Hint (3 left)</button>
+                <button class="btn btn-primary" id="resetBtn">New Game</button>
+            </div>
+
+            <div class="instructions">
+                <h3>How to Play</h3>
+                <p>Each team takes turns clicking on cards to find matching pairs. When a team finds a match, they score a point and get another turn!</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
