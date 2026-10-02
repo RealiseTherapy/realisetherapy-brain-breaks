@@ -37,6 +37,7 @@ body {
     margin-bottom: 8px;
     position: relative;
     flex-shrink: 0;
+    min-height: 35px;
 }
 
 .back-button {
@@ -188,6 +189,7 @@ h3 {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 6px;
     flex-shrink: 0;
+    min-height: 60px;
 }
 
 .team-score-card {
@@ -231,6 +233,10 @@ h3 {
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
+    min-height: 45px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .current-team-text {
@@ -252,6 +258,7 @@ h3 {
     justify-content: center;
     gap: 10px;
     flex-shrink: 0;
+    min-height: 45px;
 }
 
 .info-item {
@@ -261,6 +268,9 @@ h3 {
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .info-label {
@@ -282,13 +292,15 @@ h3 {
 .game-board {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    grid-template-rows: repeat(auto-fit, 1fr);
+    gap: 8px;
     padding: 10px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     backdrop-filter: blur(10px);
     flex: 1;
-    min-height: 0;
+    min-height: 200px;
+    align-content: start;
 }
 
 .card {
@@ -306,6 +318,7 @@ h3 {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     user-select: none;
     padding: 0;
+    flex-shrink: 0;
 }
 
 .card:hover:not(.matched):not(.flipped) {
@@ -353,6 +366,7 @@ h3 {
     justify-content: center;
     flex-wrap: wrap;
     flex-shrink: 0;
+    min-height: 40px;
 }
 
 .btn {
@@ -364,6 +378,7 @@ h3 {
     font-weight: bold;
     transition: all 0.3s;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .btn-primary {
@@ -431,7 +446,7 @@ h3 {
     }
 
     .game-board {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 5px;
         padding: 8px;
     }
