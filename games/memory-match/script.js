@@ -267,6 +267,7 @@ function updateScoreboard() {
         card.className = 'team-score-card';
         if (index === gameState.currentTeamIndex) {
             card.classList.add('active');
+            card.style.backgroundColor = teamColors[index % teamColors.length];
         }
 
         card.innerHTML = `
