@@ -23,7 +23,7 @@ body {
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 15px;
+    padding: 12px;
     max-width: 100vw;
     max-height: 100vh;
     overflow: hidden;
@@ -33,8 +33,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 8px;
     position: relative;
     flex-shrink: 0;
 }
@@ -44,9 +44,9 @@ body {
     left: 0;
     color: white;
     text-decoration: none;
-    font-size: 1em;
+    font-size: 0.85em;
     background: rgba(255, 255, 255, 0.2);
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 6px;
     transition: background 0.3s;
 }
@@ -57,21 +57,21 @@ body {
 
 h1 {
     color: white;
-    font-size: 1.8em;
+    font-size: clamp(1.2em, 4vw, 1.8em);
     text-align: center;
 }
 
 h2 {
     color: white;
-    font-size: 1.5em;
-    margin-bottom: 20px;
+    font-size: 1.3em;
+    margin-bottom: 15px;
     text-align: center;
 }
 
 h3 {
     color: #667eea;
     margin-bottom: 8px;
-    font-size: 0.95em;
+    font-size: 0.9em;
 }
 
 /* Setup Screen */
@@ -171,6 +171,7 @@ h3 {
     height: 100%;
     overflow: hidden;
     animation: fadeIn 0.3s ease-out;
+    gap: 8px;
 }
 
 @keyframes fadeIn {
@@ -184,21 +185,20 @@ h3 {
 
 .scoreboard {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 10px;
-    margin-bottom: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 6px;
     flex-shrink: 0;
 }
 
 .team-score-card {
     background: white;
-    padding: 12px;
-    border-radius: 8px;
+    padding: 8px;
+    border-radius: 6px;
     text-align: center;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s;
-    border: 3px solid transparent;
-    min-height: 70px;
+    border: 2px solid transparent;
+    min-height: 60px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -207,43 +207,42 @@ h3 {
 .team-score-card.active {
     border-color: #ffd700;
     transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
 }
 
 .team-name {
     color: #666;
-    font-size: 0.7em;
+    font-size: 0.65em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .team-score {
-    font-size: 2em;
+    font-size: 1.6em;
     font-weight: bold;
     color: #667eea;
 }
 
 .current-team-indicator {
     background: white;
-    padding: 12px;
-    border-radius: 8px;
+    padding: 8px;
+    border-radius: 6px;
     text-align: center;
-    margin-bottom: 10px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
 }
 
 .current-team-text {
     color: #666;
-    font-size: 0.75em;
+    font-size: 0.65em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .current-team-name {
-    font-size: 1.4em;
+    font-size: clamp(0.9em, 3vw, 1.2em);
     font-weight: bold;
     color: #ffd700;
 }
@@ -251,25 +250,24 @@ h3 {
 .game-info {
     display: flex;
     justify-content: center;
-    gap: 15px;
-    margin-bottom: 10px;
+    gap: 10px;
     flex-shrink: 0;
 }
 
 .info-item {
     background: white;
-    padding: 10px 20px;
+    padding: 6px 15px;
     border-radius: 6px;
     text-align: center;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    min-width: 100px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-width: 80px;
 }
 
 .info-label {
     display: block;
     color: #666;
-    font-size: 0.75em;
-    margin-bottom: 5px;
+    font-size: 0.65em;
+    margin-bottom: 3px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -277,22 +275,20 @@ h3 {
 .info-value {
     display: block;
     color: #667eea;
-    font-size: 1.5em;
+    font-size: 1.3em;
     font-weight: bold;
 }
 
 .game-board {
     display: grid;
-    gap: 8px;
-    margin-bottom: 10px;
-    padding: 12px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 10px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    border-radius: 10px;
     backdrop-filter: blur(10px);
     flex: 1;
     min-height: 0;
-    overflow: auto;
-    align-content: start;
 }
 
 .card {
@@ -300,20 +296,21 @@ h3 {
     aspect-ratio: 1 / 1;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: clamp(1.2em, 5vw, 2.5em);
+    font-size: clamp(0.8em, 3vw, 1.5em);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     user-select: none;
+    padding: 0;
 }
 
 .card:hover:not(.matched):not(.flipped) {
     transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
 }
 
 .card:active:not(.matched):not(.flipped) {
@@ -323,14 +320,14 @@ h3 {
 .card.flipped {
     background: white;
     color: #667eea;
-    box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .card.matched {
     background: #4ade80;
     color: white;
     cursor: default;
-    animation: pulse 0.6s ease-out;
+    animation: pulse 0.5s ease-out;
 }
 
 @keyframes pulse {
@@ -338,7 +335,7 @@ h3 {
         transform: scale(1);
     }
     50% {
-        transform: scale(1.1);
+        transform: scale(1.08);
     }
     100% {
         transform: scale(1);
@@ -352,17 +349,17 @@ h3 {
 
 .controls {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
     flex-wrap: wrap;
     flex-shrink: 0;
 }
 
 .btn {
-    padding: 12px 24px;
-    font-size: 0.95em;
+    padding: 10px 20px;
+    font-size: clamp(0.8em, 2vw, 0.95em);
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
     transition: all 0.3s;
@@ -396,18 +393,18 @@ h3 {
 
 .instructions {
     background: white;
-    padding: 12px;
-    border-radius: 8px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
     display: none;
+    font-size: 0.8em;
 }
 
 .instructions p {
     color: #666;
-    margin-bottom: 6px;
-    line-height: 1.4;
-    font-size: 0.85em;
+    margin-bottom: 4px;
+    line-height: 1.3;
 }
 
 /* Responsive Design */
@@ -418,99 +415,77 @@ h3 {
 }
 
 @media (max-width: 900px) {
-    h1 {
-        font-size: 1.5em;
-    }
-
     .game-board {
         grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
-        padding: 10px;
-    }
-
-    .scoreboard {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        font-size: 0.9em;
-    }
-
-    .setup-content {
-        padding: 20px;
-    }
-
-    .team-controls {
-        padding: 12px;
-        gap: 12px;
-    }
-
-    .btn-small {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2em;
     }
 }
 
 @media (max-width: 600px) {
-    h1 {
-        font-size: 1.3em;
+    .container {
+        padding: 10px;
+    }
+
+    .header {
+        margin-bottom: 6px;
+        gap: 10px;
     }
 
     .game-board {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 5px;
         padding: 8px;
     }
 
-    .card {
-        font-size: clamp(1em, 4vw, 1.8em);
-    }
-
     .scoreboard {
         grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
+        gap: 5px;
     }
 
     .team-score-card {
-        padding: 10px;
-        min-height: 60px;
+        padding: 6px;
+        min-height: 50px;
     }
 
     .team-score {
-        font-size: 1.6em;
+        font-size: 1.3em;
     }
 
-    .setup-content {
-        padding: 15px;
+    .current-team-indicator {
+        padding: 6px;
     }
 
     .game-info {
-        gap: 10px;
+        gap: 8px;
     }
 
     .info-item {
-        padding: 8px 15px;
-        min-width: 80px;
+        padding: 6px 12px;
+        min-width: 70px;
     }
 
     .info-value {
-        font-size: 1.3em;
+        font-size: 1.1em;
+    }
+
+    .btn {
+        padding: 8px 16px;
     }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+
     .back-button {
         position: static;
         width: 100%;
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 6px;
     }
 
     h1 {
-        font-size: 1.1em;
+        font-size: 1.2em;
     }
 
     .game-board {
@@ -520,61 +495,56 @@ h3 {
     }
 
     .card {
-        font-size: clamp(0.9em, 3vw, 1.5em);
+        font-size: clamp(0.7em, 2vw, 1.2em);
     }
 
     .scoreboard {
         grid-template-columns: 1fr;
-        gap: 6px;
+        gap: 4px;
     }
 
     .team-score-card {
-        padding: 10px;
-        min-height: 60px;
+        padding: 6px;
+        min-height: 45px;
     }
 
     .current-team-indicator {
-        padding: 10px;
-        margin-bottom: 8px;
+        padding: 6px;
+        margin-bottom: 6px;
     }
 
     .current-team-name {
-        font-size: 1.2em;
+        font-size: 1em;
     }
 
     .team-score {
-        font-size: 1.4em;
-    }
-
-    .setup-content {
-        padding: 15px;
-    }
-
-    .header {
-        margin-bottom: 10px;
-        gap: 10px;
-    }
-
-    .game-info {
-        gap: 8px;
-        margin-bottom: 8px;
-    }
-
-    .info-item {
-        padding: 8px 12px;
-        min-width: 70px;
-    }
-
-    .info-value {
         font-size: 1.2em;
     }
 
+    .game-info {
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+
+    .info-item {
+        padding: 5px 10px;
+        min-width: 60px;
+    }
+
+    .info-label {
+        font-size: 0.6em;
+    }
+
+    .info-value {
+        font-size: 1em;
+    }
+
     .controls {
-        gap: 8px;
+        gap: 6px;
     }
 
     .btn {
-        padding: 10px 18px;
-        font-size: 0.85em;
+        padding: 8px 14px;
+        font-size: 0.8em;
     }
 }
