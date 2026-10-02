@@ -37,7 +37,7 @@ body {
     margin-bottom: 8px;
     position: relative;
     flex-shrink: 0;
-    min-height: 35px;
+    height: 35px;
 }
 
 .back-button {
@@ -172,7 +172,6 @@ h3 {
     height: 100%;
     overflow: hidden;
     animation: fadeIn 0.3s ease-out;
-    gap: 8px;
 }
 
 @keyframes fadeIn {
@@ -189,7 +188,8 @@ h3 {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 6px;
     flex-shrink: 0;
-    min-height: 60px;
+    height: 70px;
+    padding: 0;
 }
 
 .team-score-card {
@@ -200,7 +200,6 @@ h3 {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s;
     border: 2px solid transparent;
-    min-height: 60px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -233,7 +232,7 @@ h3 {
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
-    min-height: 45px;
+    height: 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -258,7 +257,7 @@ h3 {
     justify-content: center;
     gap: 10px;
     flex-shrink: 0;
-    min-height: 45px;
+    height: 50px;
 }
 
 .info-item {
@@ -292,25 +291,25 @@ h3 {
 .game-board {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(auto-fit, 1fr);
-    gap: 8px;
+    grid-auto-rows: 1fr;
+    gap: 10px;
     padding: 10px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     backdrop-filter: blur(10px);
     flex: 1;
-    min-height: 200px;
-    align-content: start;
+    min-height: 0;
+    aspect-ratio: 1;
 }
 
 .card {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    height: 100%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: clamp(0.8em, 3vw, 1.5em);
+    font-size: clamp(0.8em, 3vw, 2em);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -366,7 +365,8 @@ h3 {
     justify-content: center;
     flex-wrap: wrap;
     flex-shrink: 0;
-    min-height: 40px;
+    height: 45px;
+    padding: 5px 0;
 }
 
 .btn {
@@ -379,6 +379,7 @@ h3 {
     transition: all 0.3s;
     white-space: nowrap;
     flex-shrink: 0;
+    height: fit-content;
 }
 
 .btn-primary {
@@ -423,12 +424,6 @@ h3 {
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
-    .game-board {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
 @media (max-width: 900px) {
     .game-board {
         grid-template-columns: repeat(4, 1fr);
@@ -438,27 +433,29 @@ h3 {
 @media (max-width: 600px) {
     .container {
         padding: 10px;
+        gap: 6px;
     }
 
     .header {
         margin-bottom: 6px;
         gap: 10px;
+        height: 30px;
     }
 
     .game-board {
         grid-template-columns: repeat(3, 1fr);
-        gap: 5px;
+        gap: 8px;
         padding: 8px;
     }
 
     .scoreboard {
         grid-template-columns: repeat(2, 1fr);
         gap: 5px;
+        height: 60px;
     }
 
     .team-score-card {
         padding: 6px;
-        min-height: 50px;
     }
 
     .team-score {
@@ -467,10 +464,12 @@ h3 {
 
     .current-team-indicator {
         padding: 6px;
+        height: 45px;
     }
 
     .game-info {
         gap: 8px;
+        height: 45px;
     }
 
     .info-item {
@@ -485,27 +484,37 @@ h3 {
     .btn {
         padding: 8px 16px;
     }
+
+    .controls {
+        height: 40px;
+    }
 }
 
 @media (max-width: 480px) {
     .container {
         padding: 8px;
+        gap: 5px;
     }
 
     .back-button {
         position: static;
         width: 100%;
         text-align: center;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
 
     h1 {
-        font-size: 1.2em;
+        font-size: 1.1em;
+    }
+
+    .header {
+        height: 28px;
+        margin-bottom: 4px;
     }
 
     .game-board {
         grid-template-columns: repeat(3, 1fr);
-        gap: 4px;
+        gap: 6px;
         padding: 6px;
     }
 
@@ -516,16 +525,16 @@ h3 {
     .scoreboard {
         grid-template-columns: 1fr;
         gap: 4px;
+        height: 55px;
     }
 
     .team-score-card {
         padding: 6px;
-        min-height: 45px;
     }
 
     .current-team-indicator {
         padding: 6px;
-        margin-bottom: 6px;
+        height: 40px;
     }
 
     .current-team-name {
@@ -538,7 +547,7 @@ h3 {
 
     .game-info {
         gap: 6px;
-        margin-bottom: 6px;
+        height: 40px;
     }
 
     .info-item {
@@ -556,6 +565,7 @@ h3 {
 
     .controls {
         gap: 6px;
+        height: 38px;
     }
 
     .btn {
