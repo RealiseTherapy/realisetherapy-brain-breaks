@@ -21,8 +21,14 @@ const emojiSets = {
 };
 
 const teamColors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F',
-    '#BB8FCE', '#85C1E2', '#F8B88B', '#85E7D7'
+    '#D62828', // red
+    '#2563EB', // blue
+    '#16A34A', // green
+    '#FACC15', // yellow
+    '#9333EA', // purple
+    '#F97316', // orange
+    '#14B8A6', // teal
+    '#7F1D1D'  // maroon
 ];
 
 const difficultySettings = {
@@ -77,7 +83,7 @@ function updateTeamDisplay() {
     const decreaseBtn = document.getElementById('decreaseTeamsBtn');
     const increaseBtn = document.getElementById('increaseTeamsBtn');
     if (decreaseBtn) decreaseBtn.disabled = gameState.teams.length <= 1;
-    if (increaseBtn) increaseBtn.disabled = gameState.teams.length >= 10;
+    if (increaseBtn) increaseBtn.disabled = gameState.teams.length >= 8;
 }
 
 // Decrease number of teams
@@ -94,7 +100,7 @@ function decreaseTeams() {
 function increaseTeams() {
     const teamCountEl = document.getElementById('teamCount');
     const currentCount = parseInt(teamCountEl.textContent, 10) || 2;
-    if (currentCount < 10) {
+    if (currentCount < 8) {
         teamCountEl.textContent = currentCount + 1;
         updateTeamDisplay();
     }
@@ -268,7 +274,7 @@ function updateScoreboard() {
             <div class="team-score">${gameState.teamScores[team]}</div>
         `;
         card.style.borderColor = teamColors[index % teamColors.length];
-        card.style.borderWidth = '3px';
+        card.style.borderWidth = '8px';
         scoreboard.appendChild(card);
     });
 
