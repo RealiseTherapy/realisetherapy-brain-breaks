@@ -309,7 +309,7 @@ h3 {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: clamp(0.8em, 3vw, 2em);
+    font-size: clamp(1.5em, 4vw, 2.8em);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -519,7 +519,7 @@ h3 {
     }
 
     .card {
-        font-size: clamp(0.7em, 2vw, 1.2em);
+        font-size: clamp(1.1em, 3vw, 1.7em);
     }
 
     .scoreboard {
