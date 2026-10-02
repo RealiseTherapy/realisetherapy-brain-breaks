@@ -203,12 +203,30 @@ h3 {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
 }
 
 .team-score-card.active {
-    border-color: #ffd700;
+    background: var(--team-color);
+    border-color: var(--team-color);
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.team-score-card.active .team-name {
+    color: white;
+}
+
+.team-score-card.active .team-score {
+    color: var(--team-color);
+    background: white;
+    border-radius: 50%;
+    width: 2.2em;
+    height: 2.2em;
+    line-height: 2.2em;
+    margin: 0 auto;
+    display: inline-block;
+    font-weight: 700;
 }
 
 .team-name {
