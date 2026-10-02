@@ -31,6 +31,13 @@ const difficultySettings = {
     hard: 16
 };
 
+function resetHintButton() {
+    const hintBtn = document.getElementById('hintBtn');
+    if (!hintBtn) return;
+    hintBtn.textContent = 'Hint (3 left)';
+    hintBtn.disabled = false;
+}
+
 // Initialize team setup screen
 function initSetupScreen() {
     updateTeamDisplay();
@@ -38,11 +45,13 @@ function initSetupScreen() {
     document.getElementById('decreaseTeamsBtn').addEventListener('click', decreaseTeams);
     document.getElementById('increaseTeamsBtn').addEventListener('click', increaseTeams);
     document.getElementById('startGameBtn').addEventListener('click', startGame);
+    resetHintButton();
 }
 
 // Update team count display
 function updateTeamDisplay() {
-    const teamCount = parseInt(document.getElementById('teamCount').textContent);
+    const teamCountEl = document.getElementById('teamCount');
+    const teamCount = parseInt(teamCountEl ? teamCountEl.textContent : '2', 10) || 2;
     gameState.teams = [];
     gameState.teamScores = {};
 
@@ -54,25 +63,29 @@ function updateTeamDisplay() {
 
     // Render team list
     const teamList = document.getElementById('teamList');
-    teamList.innerHTML = '';
+    if (teamList) {
+        teamList.innerHTML = '';
+    }
     
     gameState.teams.forEach((team, index) => {
         const teamItem = document.createElement('div');
         teamItem.className = 'team-item';
         teamItem.textContent = team;
         teamItem.style.borderLeftColor = teamColors[index % teamColors.length];
-        teamList.appendChild(teamItem);
+        if (teamList) teamList.appendChild(teamItem);
     });
 
     // Update button states
-    document.getElementById('decreaseTeamsBtn').disabled = gameState.teams.length <= 1;
-    document.getElementById('increaseTeamsBtn').disabled = gameState.teams.length >= 10;
+    const decreaseBtn = document.getElementById('decreaseTeamsBtn');
+    const increaseBtn = document.getElementById('increaseTeamsBtn');
+    if (decreaseBtn) decreaseBtn.disabled = gameState.teams.length <= 1;
+    if (increaseBtn) increaseBtn.disabled = gameState.teams.length >= 10;
 }
 
 // Decrease number of teams
 function decreaseTeams() {
     const teamCountEl = document.getElementById('teamCount');
-    const currentCount = parseInt(teamCountEl.textContent);
+    const currentCount = parseInt(teamCountEl.textContent, 10) || 2;
     if (currentCount > 1) {
         teamCountEl.textContent = currentCount - 1;
         updateTeamDisplay();
@@ -82,7 +95,7 @@ function decreaseTeams() {
 // Increase number of teams
 function increaseTeams() {
     const teamCountEl = document.getElementById('teamCount');
-    const currentCount = parseInt(teamCountEl.textContent);
+    const currentCount = parseInt(teamCountEl.textContent, 10) || 2;
     if (currentCount < 10) {
         teamCountEl.textContent = currentCount + 1;
         updateTeamDisplay();
@@ -98,6 +111,7 @@ function startGame() {
     gameState.matched = [];
     gameState.hintCount = 3;
     gameState.isProcessing = false;
+    gameState.teams = gameState.teams.length ? gameState.teams : ['Team 1', 'Team 2'];
 
     // Reset team scores
     gameState.teams.forEach(team => {
@@ -114,6 +128,7 @@ function startGame() {
     document.getElementById('setupScreen').style.display = 'none';
     document.getElementById('gameScreen').style.display = 'block';
 
+    resetHintButton();
     renderBoard();
     updateScoreboard();
     updateGameInfo();
@@ -200,7 +215,10 @@ function checkMatch() {
 
 // Announce the winner
 function announceWinner() {
-    let maxScore = Math.max(...Object.values(gameState.teamScores));
+    const scores = Object.values(gameState.teamScores);
+    if (!scores.length) return;
+
+    let maxScore = Math.max(...scores);
     let winners = Object.entries(gameState.teamScores)
         .filter(([_, score]) => score === maxScore)
         .map(([team, _]) => team);
@@ -221,6 +239,7 @@ function announceWinner() {
     message += `\nTotal Moves: ${gameState.moves}`;
 
     alert(message);
+    resetToSetup();
 }
 
 // Update scoreboard display
@@ -246,6 +265,11 @@ function updateScoreboard() {
     // Update current team indicator
     const indicator = document.getElementById('currentTeamIndicator');
     const currentTeam = gameState.teams[gameState.currentTeamIndex];
+    if (!currentTeam) {
+        indicator.innerHTML = '';
+        return;
+    }
+
     indicator.innerHTML = `
         <div class="current-team-text">Current Team</div>
         <div class="current-team-name" style="color: ${teamColors[gameState.currentTeamIndex % teamColors.length]}">${currentTeam}</div>
@@ -264,6 +288,8 @@ function showHint() {
         alert('No more hints available!');
         return;
     }
+
+    if (!gameState.cards.length) return;
 
     // Find an unmatched card and flip it temporarily
     const unmatchedCards = gameState.cards
@@ -287,8 +313,18 @@ function showHint() {
 
 // Reset to setup screen
 function resetToSetup() {
-    document.getElementById('gameScreen').style.display = 'none';
-    document.getElementById('setupScreen').style.display = 'flex';
+    const gameScreen = document.getElementById('gameScreen');
+    const setupScreen = document.getElementById('setupScreen');
+    if (gameScreen) gameScreen.style.display = 'none';
+    if (setupScreen) setupScreen.style.display = 'flex';
+    gameState.flipped = [];
+    gameState.matched = [];
+    gameState.cards = [];
+    gameState.moves = 0;
+    gameState.isProcessing = false;
+    gameState.hintCount = 3;
+    updateGameInfo();
+    resetHintButton();
 }
 
 // Event Listeners
