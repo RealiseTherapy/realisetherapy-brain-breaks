@@ -4,7 +4,6 @@ let gameState = {
     flipped: [],
     matched: [],
     moves: 0,
-    hintCount: 3,
     isProcessing: false,
     difficulty: 'medium',
     teams: [],
@@ -31,13 +30,6 @@ const difficultySettings = {
     hard: 16
 };
 
-function resetHintButton() {
-    const hintBtn = document.getElementById('hintBtn');
-    if (!hintBtn) return;
-    hintBtn.textContent = 'Hint (3 left)';
-    hintBtn.disabled = false;
-}
-
 // Initialize team setup screen
 function initSetupScreen() {
     updateTeamDisplay();
@@ -45,7 +37,6 @@ function initSetupScreen() {
     document.getElementById('decreaseTeamsBtn').addEventListener('click', decreaseTeams);
     document.getElementById('increaseTeamsBtn').addEventListener('click', increaseTeams);
     document.getElementById('startGameBtn').addEventListener('click', startGame);
-    resetHintButton();
 }
 
 // Update team count display
@@ -109,7 +100,6 @@ function startGame() {
     gameState.moves = 0;
     gameState.flipped = [];
     gameState.matched = [];
-    gameState.hintCount = 3;
     gameState.isProcessing = false;
     gameState.teams = gameState.teams.length ? gameState.teams : ['Team 1', 'Team 2'];
 
@@ -126,9 +116,8 @@ function startGame() {
 
     // Switch screens
     document.getElementById('setupScreen').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'block';
+    document.getElementById('gameScreen').style.display = 'flex';
 
-    resetHintButton();
     renderBoard();
     updateScoreboard();
     updateGameInfo();
@@ -282,35 +271,6 @@ function updateGameInfo() {
     document.getElementById('matches').textContent = gameState.matched.length / 2;
 }
 
-// Show a hint
-function showHint() {
-    if (gameState.hintCount <= 0) {
-        alert('No more hints available!');
-        return;
-    }
-
-    if (!gameState.cards.length) return;
-
-    // Find an unmatched card and flip it temporarily
-    const unmatchedCards = gameState.cards
-        .map((_, i) => i)
-        .filter(i => !gameState.matched.includes(i) && !gameState.flipped.includes(i));
-
-    if (unmatchedCards.length > 0) {
-        const hintIndex = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
-        gameState.flipped.push(hintIndex);
-        gameState.hintCount--;
-        document.getElementById('hintBtn').textContent = `Hint (${gameState.hintCount} left)`;
-        document.getElementById('hintBtn').disabled = gameState.hintCount <= 0;
-        renderBoard();
-
-        setTimeout(() => {
-            gameState.flipped = gameState.flipped.filter(i => i !== hintIndex);
-            renderBoard();
-        }, 1000);
-    }
-}
-
 // Reset to setup screen
 function resetToSetup() {
     const gameScreen = document.getElementById('gameScreen');
@@ -322,14 +282,11 @@ function resetToSetup() {
     gameState.cards = [];
     gameState.moves = 0;
     gameState.isProcessing = false;
-    gameState.hintCount = 3;
     updateGameInfo();
-    resetHintButton();
 }
 
 // Event Listeners
 document.getElementById('resetBtn').addEventListener('click', resetToSetup);
-document.getElementById('hintBtn').addEventListener('click', showHint);
 
 // Initialize on page load
 window.addEventListener('load', initSetupScreen);
