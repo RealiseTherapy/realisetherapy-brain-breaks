@@ -283,7 +283,6 @@ h3 {
 
 .game-board {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
     gap: 8px;
     margin-bottom: 10px;
     padding: 12px;
@@ -293,22 +292,23 @@ h3 {
     flex: 1;
     min-height: 0;
     overflow: auto;
+    align-content: start;
 }
 
 .card {
-    aspect-ratio: 1;
+    width: 100%;
+    aspect-ratio: 1 / 1;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 1.8em;
+    font-size: clamp(1.2em, 5vw, 2.5em);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     user-select: none;
-    min-height: 50px;
 }
 
 .card:hover:not(.matched):not(.flipped) {
@@ -411,7 +411,13 @@ h3 {
 }
 
 /* Responsive Design */
-@media (max-width: 600px) {
+@media (max-width: 1200px) {
+    .game-board {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
     h1 {
         font-size: 1.5em;
     }
@@ -420,11 +426,6 @@ h3 {
         grid-template-columns: repeat(4, 1fr);
         gap: 6px;
         padding: 10px;
-    }
-
-    .card {
-        font-size: 1.5em;
-        min-height: 45px;
     }
 
     .scoreboard {
@@ -453,16 +454,9 @@ h3 {
     }
 }
 
-@media (max-width: 400px) {
-    .back-button {
-        position: static;
-        width: 100%;
-        text-align: center;
-        margin-bottom: 10px;
-    }
-
+@media (max-width: 600px) {
     h1 {
-        font-size: 1.2em;
+        font-size: 1.3em;
     }
 
     .game-board {
@@ -471,8 +465,12 @@ h3 {
         padding: 8px;
     }
 
+    .card {
+        font-size: clamp(1em, 4vw, 1.8em);
+    }
+
     .scoreboard {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 6px;
     }
 
@@ -489,10 +487,6 @@ h3 {
         padding: 15px;
     }
 
-    .card {
-        font-size: 1.3em;
-    }
-
     .game-info {
         gap: 10px;
     }
@@ -504,5 +498,83 @@ h3 {
 
     .info-value {
         font-size: 1.3em;
+    }
+}
+
+@media (max-width: 400px) {
+    .back-button {
+        position: static;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    h1 {
+        font-size: 1.1em;
+    }
+
+    .game-board {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        padding: 6px;
+    }
+
+    .card {
+        font-size: clamp(0.9em, 3vw, 1.5em);
+    }
+
+    .scoreboard {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .team-score-card {
+        padding: 10px;
+        min-height: 60px;
+    }
+
+    .current-team-indicator {
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+
+    .current-team-name {
+        font-size: 1.2em;
+    }
+
+    .team-score {
+        font-size: 1.4em;
+    }
+
+    .setup-content {
+        padding: 15px;
+    }
+
+    .header {
+        margin-bottom: 10px;
+        gap: 10px;
+    }
+
+    .game-info {
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .info-item {
+        padding: 8px 12px;
+        min-width: 70px;
+    }
+
+    .info-value {
+        font-size: 1.2em;
+    }
+
+    .controls {
+        gap: 8px;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        font-size: 0.85em;
     }
 }
