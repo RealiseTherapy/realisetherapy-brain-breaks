@@ -166,8 +166,6 @@ function flipCard(index) {
     }
 
     gameState.flipped.push(index);
-    gameState.moves++;
-    updateGameInfo();
     renderBoard();
 
     if (gameState.flipped.length === 2) {
@@ -195,7 +193,8 @@ function checkMatch() {
             }
         }
 
-        // Always rotate turn after every result, including a successful match.
+        // Increment moves once per turn, then rotate to next team
+        gameState.moves++;
         gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
         gameState.flipped = [];
         gameState.isProcessing = false;
