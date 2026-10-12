@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Timer - Brain Breaks</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../" class="back-button">← Back</a>
+            <h1>⏱️ Visual Timer</h1>
+        </div>
+        <div class="presets">
+            <button class="btn preset" data-minutes="1">1 min</button>
+            <button class="btn preset" data-minutes="2">2 min</button>
+            <button class="btn preset" data-minutes="5">5 min</button>
+            <button class="btn preset" data-minutes="10">10 min</button>
+            <label class="custom">
+                <input type="number" id="customMinutes" min="1" max="180" placeholder="Custom" aria-label="Custom minutes">
+                <button class="btn" id="customBtn">Set</button>
+            </label>
+        </div>
+        <div class="timer-wrap">
+            <div class="ring" id="ring">
+                <div class="ring-inner">
+                    <div class="time" id="time">05:00</div>
+                    <div class="message" id="message"></div>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn start" id="startBtn">▶ Start</button>
+            <button class="btn" id="resetBtn">↺ Reset</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
