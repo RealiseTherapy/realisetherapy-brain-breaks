@@ -61,8 +61,8 @@ function formatTime(seconds) {
 function updateDisplay() {
     timeDisplay.textContent = formatTime(state.remaining);
 
-    const progress = state.duration > 0 ? state.remaining / state.duration : 0;
-    ringProgress.style.strokeDashoffset = `${-RING_CIRCUMFERENCE * (1 - progress)}`;
+    const progress = state.duration > 0 ? 1 - state.remaining / state.duration : 0;
+    ringProgress.style.strokeDashoffset = `${RING_CIRCUMFERENCE * (1 - progress)}`;
 }
 
 function stopTimer(clearRemaining = false) {
