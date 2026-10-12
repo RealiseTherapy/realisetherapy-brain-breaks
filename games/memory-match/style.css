@@ -192,14 +192,15 @@ h3 {
     padding: 0;
 }
 
+/* Default (not their turn): filled with team colour, white text */
 .team-score-card {
-    background: white;
+    background: var(--team-color);
     padding: 8px;
     border-radius: 6px;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s;
-    border: 8px solid transparent;
+    border: 8px solid var(--team-color);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -208,36 +209,36 @@ h3 {
     position: relative;
 }
 
+.team-score-card .team-name {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    position: relative;
+    z-index: 1;
+}
+
+.team-score-card .team-score {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    position: relative;
+    z-index: 1;
+}
+
+/* Active (their turn): white box with team-coloured border */
 .team-score-card.active {
-    background: var(--team-color);
+    background: white;
     border-color: var(--team-color);
     transform: scale(1.02);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .team-score-card.active .team-name {
-    color: white;
-    margin-bottom: 2px;
-    position: relative;
-    z-index: 1;
+    color: #666;
+    text-shadow: none;
 }
 
 .team-score-card.active .team-score {
     color: var(--team-color);
-    background: white;
-    border-radius: 50%;
-    width: 2em;
-    height: 2em;
-    line-height: 2em;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    margin: 0 auto;
-    font-size: 1.15em;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
+    text-shadow: none;
 }
 
 .team-name {

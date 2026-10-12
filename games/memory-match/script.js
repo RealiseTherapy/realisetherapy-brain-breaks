@@ -237,21 +237,19 @@ function updateScoreboard() {
     scoreboard.innerHTML = '';
 
     gameState.teams.forEach((team, index) => {
+        const color = teamColors[index % teamColors.length];
         const card = document.createElement('div');
         card.className = 'team-score-card';
         if (index === gameState.currentTeamIndex) {
             card.classList.add('active');
-            card.style.backgroundColor = teamColors[index % teamColors.length];
-            card.style.setProperty('--team-color', teamColors[index % teamColors.length]);
         }
 
         card.innerHTML = `
             <div class="team-name">${team}</div>
             <div class="team-score">${gameState.teamScores[team]}</div>
         `;
-        card.style.borderColor = teamColors[index % teamColors.length];
-        card.style.borderWidth = '8px';
-        card.style.setProperty('--team-color', teamColors[index % teamColors.length]);
+        // Styling (filled vs. white) is handled in CSS via --team-color
+        card.style.setProperty('--team-color', color);
         scoreboard.appendChild(card);
     });
 
