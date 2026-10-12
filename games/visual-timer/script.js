@@ -39,10 +39,7 @@ function playAlert() {
 }
 
 const timeDisplay = document.getElementById('timeDisplay');
-const setTimeDisplay = document.getElementById('setTimeDisplay');
-const statusDisplay = document.getElementById('statusDisplay');
 const finishMessage = document.getElementById('finishMessage');
-const timerSetup = document.getElementById('timerSetup');
 const timerStage = document.getElementById('timerStage');
 const ringProgress = document.getElementById('ringProgress');
 const startPauseBtn = document.getElementById('startPauseBtn');
@@ -61,26 +58,11 @@ function formatTime(seconds) {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-function setStatus(text) {
-    statusDisplay.textContent = text;
-}
-
 function updateDisplay() {
     timeDisplay.textContent = formatTime(state.remaining);
-    setTimeDisplay.textContent = formatTime(state.duration);
 
     const progress = state.duration > 0 ? state.remaining / state.duration : 0;
-    ringProgress.style.strokeDashoffset = `${RING_CIRCUMFERENCE * (1 - progress)}`;
-}
-
-function showTimerStage() {
-    timerSetup.hidden = true;
-    timerStage.hidden = false;
-}
-
-function showSetupStage() {
-    timerSetup.hidden = false;
-    timerStage.hidden = true;
+    ringProgress.style.strokeDashoffset = `${-RING_CIRCUMFERENCE * (1 - progress)}`;
 }
 
 function stopTimer(clearRemaining = false) {
@@ -90,7 +72,7 @@ function stopTimer(clearRemaining = false) {
     }
     state.running = false;
     state.endTime = null;
-    startPauseBtn.textContent = 'Start';
+    startPauseBtn.textContent = 'Pause';
     if (clearRemaining) {
         state.remaining = state.duration;
     }
@@ -104,12 +86,9 @@ function tick() {
 
     if (state.remaining <= 0) {
         stopTimer();
-        setStatus('Finished');
+        startPauseBtn.disabled = true;
         finishMessage.hidden = false;
         timerStage.classList.add('finished');
-        presetButtons.forEach(btn => btn.disabled = false);
-        customMinutesInput.disabled = false;
-        setCustomBtn.disabled = false;
         playAlert();
     }
 }
@@ -126,10 +105,7 @@ function startTimer() {
     state.running = true;
     state.endTime = Date.now() + state.remaining * 1000;
     startPauseBtn.textContent = 'Pause';
-    setStatus('Running');
-    presetButtons.forEach(btn => btn.disabled = true);
-    customMinutesInput.disabled = true;
-    setCustomBtn.disabled = true;
+    startPauseBtn.disabled = false;
 
     tick();
     state.timerId = setInterval(tick, 250);
@@ -142,11 +118,7 @@ function pauseTimer() {
     }
     state.running = false;
     state.endTime = null;
-    startPauseBtn.textContent = 'Start';
-    setStatus('Paused');
-    presetButtons.forEach(btn => btn.disabled = false);
-    customMinutesInput.disabled = false;
-    setCustomBtn.disabled = false;
+    startPauseBtn.textContent = 'Resume';
 }
 
 function loadMinutes(minutes) {
@@ -154,10 +126,9 @@ function loadMinutes(minutes) {
     state.duration = safeMinutes * 60;
     state.remaining = state.duration;
     stopTimer();
-    showTimerStage();
     finishMessage.hidden = true;
-    setStatus('Ready');
     updateDisplay();
+    startTimer();
 }
 
 function handlePresetClick(event) {
@@ -184,13 +155,10 @@ function toggleStartPause() {
 }
 
 function resetTimer() {
-    if (!state.duration) {
-        showSetupStage();
-        return;
-    }
     stopTimer(true);
+    timerStage.classList.remove('finished');
     finishMessage.hidden = true;
-    setStatus('Ready');
+    startPauseBtn.disabled = true;
     updateDisplay();
 }
 
@@ -202,7 +170,4 @@ customMinutesInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') handleCustomSet();
 });
 
-showSetupStage();
-state.remaining = 0;
 updateDisplay();
-setStatus('Ready');

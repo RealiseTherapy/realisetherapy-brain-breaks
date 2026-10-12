@@ -78,13 +78,11 @@ h2 {
     min-height: 0;
 }
 
-.timer-setup,
 .timer-stage {
     width: 100%;
     max-width: 720px;
 }
 
-.setup-card,
 .timer-stage {
     background: rgba(255, 255, 255, 0.96);
     border-radius: 20px;
@@ -92,18 +90,10 @@ h2 {
     padding: 24px;
 }
 
-.setup-copy {
-    text-align: center;
-    color: #4b5563;
-    margin-bottom: 18px;
-    font-size: 1rem;
-}
-
 .preset-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
-    margin-bottom: 18px;
 }
 
 .preset-btn,
@@ -126,6 +116,13 @@ h2 {
 .preset-btn:hover,
 .btn:hover {
     transform: translateY(-2px);
+}
+
+.timer-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .custom-time-row {
@@ -176,12 +173,14 @@ h2 {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: 14px;
+    max-height: 100%;
+    overflow-y: auto;
 }
 
 .timer-ring {
     position: relative;
-    width: min(78vw, 360px);
+    width: min(60vw, 40vh, 320px);
     aspect-ratio: 1;
 }
 
@@ -245,40 +244,6 @@ h2 {
     justify-content: center;
 }
 
-.timer-meta {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-}
-
-.meta-item {
-    background: #f9fafb;
-    border-radius: 14px;
-    padding: 12px 16px;
-    min-width: 140px;
-    text-align: center;
-    border: 1px solid #e5e7eb;
-}
-
-.meta-label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 6px;
-}
-
-.meta-value {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #111827;
-}
-
 .finish-message {
     font-size: 1.2rem;
     font-weight: 800;
@@ -302,9 +267,8 @@ h2 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .setup-card,
     .timer-stage {
-        padding: 18px;
+        padding: 14px;
     }
 }
 
@@ -330,13 +294,7 @@ h2 {
         flex-direction: column;
     }
 
-    .timer-actions,
-    .timer-meta {
+    .timer-actions {
         width: 100%;
-    }
-
-    .meta-item {
-        min-width: calc(50% - 6px);
-        flex: 1;
     }
 }
