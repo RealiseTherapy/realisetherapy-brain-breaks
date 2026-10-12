@@ -39,7 +39,6 @@ const difficultySettings = {
 
 // Initialize team setup screen
 function initSetupScreen() {
-    // Set default difficulty to easy
     const difficultySelect = document.getElementById('difficulty');
     if (difficultySelect) {
         difficultySelect.value = 'easy';
@@ -65,7 +64,6 @@ function updateTeamDisplay() {
         gameState.teamScores[teamName] = 0;
     }
 
-    // Render team list
     const teamList = document.getElementById('teamList');
     if (teamList) {
         teamList.innerHTML = '';
@@ -79,14 +77,12 @@ function updateTeamDisplay() {
         if (teamList) teamList.appendChild(teamItem);
     });
 
-    // Update button states
     const decreaseBtn = document.getElementById('decreaseTeamsBtn');
     const increaseBtn = document.getElementById('increaseTeamsBtn');
     if (decreaseBtn) decreaseBtn.disabled = gameState.teams.length <= 1;
     if (increaseBtn) increaseBtn.disabled = gameState.teams.length >= 8;
 }
 
-// Decrease number of teams
 function decreaseTeams() {
     const teamCountEl = document.getElementById('teamCount');
     const currentCount = parseInt(teamCountEl.textContent, 10) || 2;
@@ -96,7 +92,6 @@ function decreaseTeams() {
     }
 }
 
-// Increase number of teams
 function increaseTeams() {
     const teamCountEl = document.getElementById('teamCount');
     const currentCount = parseInt(teamCountEl.textContent, 10) || 2;
@@ -106,7 +101,6 @@ function increaseTeams() {
     }
 }
 
-// Start the game
 function startGame() {
     gameState.difficulty = document.getElementById('difficulty').value;
     gameState.currentTeamIndex = 0;
@@ -117,18 +111,15 @@ function startGame() {
     gameState.cardTeams = {};
     gameState.teams = gameState.teams.length ? gameState.teams : ['Team 1', 'Team 2'];
 
-    // Reset team scores
     gameState.teams.forEach(team => {
         gameState.teamScores[team] = 0;
     });
 
-    // Generate cards
     const pairCount = difficultySettings[gameState.difficulty];
     const emojiSet = Object.values(emojiSets)[Math.floor(Math.random() * Object.keys(emojiSets).length)];
     const selectedEmojis = emojiSet.slice(0, pairCount);
     gameState.cards = [...selectedEmojis, ...selectedEmojis].sort(() => Math.random() - 0.5);
 
-    // Switch screens
     document.getElementById('setupScreen').style.display = 'none';
     document.getElementById('gameScreen').style.display = 'flex';
 
@@ -137,7 +128,6 @@ function startGame() {
     updateGameInfo();
 }
 
-// Render the game board
 function renderBoard() {
     const board = document.getElementById('gameBoard');
     board.innerHTML = '';
@@ -148,20 +138,16 @@ function renderBoard() {
         card.className = 'card';
         card.dataset.index = index;
 
-        // Show emoji if flipped or matched
         if (gameState.flipped.includes(index) || gameState.matched.includes(index)) {
             card.textContent = emoji;
             card.classList.add('flipped');
         } else {
-            // Show card number instead of question mark
             card.textContent = index + 1;
         }
 
         if (gameState.matched.includes(index)) {
             card.classList.add('matched');
             card.disabled = true;
-            
-            // Apply the team color that found this card
             const teamIndex = gameState.cardTeams[index];
             if (teamIndex !== undefined) {
                 card.style.backgroundColor = teamColors[teamIndex % teamColors.length];
@@ -174,9 +160,7 @@ function renderBoard() {
     });
 }
 
-// Flip a card
 function flipCard(index) {
-    // Prevent flipping if already flipped, matched, or currently processing
     if (gameState.flipped.includes(index) || gameState.matched.includes(index) || gameState.isProcessing) {
         return;
     }
@@ -186,40 +170,33 @@ function flipCard(index) {
     updateGameInfo();
     renderBoard();
 
-    // Check if we have 2 cards flipped
     if (gameState.flipped.length === 2) {
         gameState.isProcessing = true;
         checkMatch();
     }
 }
 
-// Check if two flipped cards match
 function checkMatch() {
     const [first, second] = gameState.flipped;
     const isMatch = gameState.cards[first] === gameState.cards[second];
 
     setTimeout(() => {
         if (isMatch) {
-            // Match found! Current team scores
             gameState.matched.push(first, second);
             const currentTeam = gameState.teams[gameState.currentTeamIndex];
             gameState.teamScores[currentTeam]++;
-            
-            // Track which team found these cards
             gameState.cardTeams[first] = gameState.currentTeamIndex;
             gameState.cardTeams[second] = gameState.currentTeamIndex;
 
-            // Check if game is won
             if (gameState.matched.length === gameState.cards.length) {
                 setTimeout(() => {
                     announceWinner();
                 }, 300);
             }
-        } else {
-            // No match, switch to next team
-            gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
         }
 
+        // Always rotate turn after every result, including a successful match.
+        gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
         gameState.flipped = [];
         gameState.isProcessing = false;
         updateGameInfo();
@@ -228,7 +205,6 @@ function checkMatch() {
     }, 1000);
 }
 
-// Announce the winner
 function announceWinner() {
     const scores = Object.values(gameState.teamScores);
     if (!scores.length) return;
@@ -257,7 +233,6 @@ function announceWinner() {
     resetToSetup();
 }
 
-// Update scoreboard display
 function updateScoreboard() {
     const scoreboard = document.getElementById('scoreboard');
     scoreboard.innerHTML = '';
@@ -268,6 +243,7 @@ function updateScoreboard() {
         if (index === gameState.currentTeamIndex) {
             card.classList.add('active');
             card.style.backgroundColor = teamColors[index % teamColors.length];
+            card.style.setProperty('--team-color', teamColors[index % teamColors.length]);
         }
 
         card.innerHTML = `
@@ -276,10 +252,10 @@ function updateScoreboard() {
         `;
         card.style.borderColor = teamColors[index % teamColors.length];
         card.style.borderWidth = '8px';
+        card.style.setProperty('--team-color', teamColors[index % teamColors.length]);
         scoreboard.appendChild(card);
     });
 
-    // Update current team indicator
     const indicator = document.getElementById('currentTeamIndicator');
     const currentTeam = gameState.teams[gameState.currentTeamIndex];
     if (!currentTeam) {
@@ -293,13 +269,11 @@ function updateScoreboard() {
     `;
 }
 
-// Update game info display
 function updateGameInfo() {
     document.getElementById('moves').textContent = gameState.moves;
     document.getElementById('matches').textContent = gameState.matched.length / 2;
 }
 
-// Reset to setup screen
 function resetToSetup() {
     const gameScreen = document.getElementById('gameScreen');
     const setupScreen = document.getElementById('setupScreen');
@@ -314,8 +288,5 @@ function resetToSetup() {
     updateGameInfo();
 }
 
-// Event Listeners
 document.getElementById('resetBtn').addEventListener('click', resetToSetup);
-
-// Initialize on page load
 window.addEventListener('load', initSetupScreen);
