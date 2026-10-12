@@ -14,29 +14,7 @@
         </div>
 
         <main class="timer-app" aria-label="Visual timer controls and display">
-            <section class="timer-setup" id="timerSetup">
-                <div class="setup-card">
-                    <h2>Choose a Time</h2>
-                    <p class="setup-copy">Pick a quick preset or enter your own minutes.</p>
-
-                    <div class="preset-grid" aria-label="Preset timer buttons">
-                        <button class="preset-btn" data-minutes="1">1 min</button>
-                        <button class="preset-btn" data-minutes="2">2 min</button>
-                        <button class="preset-btn" data-minutes="5">5 min</button>
-                        <button class="preset-btn" data-minutes="10">10 min</button>
-                    </div>
-
-                    <div class="custom-time-row">
-                        <label for="customMinutes">Custom minutes</label>
-                        <div class="custom-input-group">
-                            <input id="customMinutes" type="number" min="1" max="180" step="1" inputmode="numeric" placeholder="e.g. 3" />
-                            <button class="btn btn-secondary" id="setCustomBtn" type="button">Set</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="timer-stage" id="timerStage" hidden>
+            <section class="timer-stage" id="timerStage">
                 <div class="timer-ring" aria-hidden="true">
                     <svg viewBox="0 0 220 220">
                         <circle class="ring-track" cx="110" cy="110" r="92"></circle>
@@ -48,24 +26,30 @@
                     </div>
                 </div>
 
+                <div class="finish-message" id="finishMessage" hidden>
+                    Time's up! Great job! 🎉
+                </div>
+
                 <div class="timer-actions">
-                    <button class="btn btn-primary" id="startPauseBtn" type="button">Start</button>
+                    <button class="btn btn-primary" id="startPauseBtn" type="button" disabled>Pause</button>
                     <button class="btn btn-secondary" id="resetBtn" type="button">Reset</button>
                 </div>
 
-                <div class="timer-meta">
-                    <div class="meta-item">
-                        <span class="meta-label">Set Time</span>
-                        <span class="meta-value" id="setTimeDisplay">00:00</span>
+                <div class="timer-controls">
+                    <div class="preset-grid" aria-label="Preset timer buttons">
+                        <button class="preset-btn" data-minutes="1">1 min</button>
+                        <button class="preset-btn" data-minutes="2">2 min</button>
+                        <button class="preset-btn" data-minutes="5">5 min</button>
+                        <button class="preset-btn" data-minutes="10">10 min</button>
                     </div>
-                    <div class="meta-item">
-                        <span class="meta-label">Status</span>
-                        <span class="meta-value" id="statusDisplay">Ready</span>
-                    </div>
-                </div>
 
-                <div class="finish-message" id="finishMessage" hidden>
-                    Time's up! Great job! 🎉
+                    <div class="custom-time-row">
+                        <label for="customMinutes">Custom minutes</label>
+                        <div class="custom-input-group">
+                            <input id="customMinutes" type="number" min="1" max="180" step="1" inputmode="numeric" placeholder="e.g. 3" />
+                            <button class="btn btn-secondary" id="setCustomBtn" type="button">Start</button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
