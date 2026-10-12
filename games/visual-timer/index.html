@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Timer - Brain Breaks</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../" class="back-button">← Back</a>
+            <h1>⏱️ Visual Timer</h1>
+        </div>
+
+        <main class="timer-app" aria-label="Visual timer controls and display">
+            <section class="timer-setup" id="timerSetup">
+                <div class="setup-card">
+                    <h2>Choose a Time</h2>
+                    <p class="setup-copy">Pick a quick preset or enter your own minutes.</p>
+
+                    <div class="preset-grid" aria-label="Preset timer buttons">
+                        <button class="preset-btn" data-minutes="1">1 min</button>
+                        <button class="preset-btn" data-minutes="2">2 min</button>
+                        <button class="preset-btn" data-minutes="5">5 min</button>
+                        <button class="preset-btn" data-minutes="10">10 min</button>
+                    </div>
+
+                    <div class="custom-time-row">
+                        <label for="customMinutes">Custom minutes</label>
+                        <div class="custom-input-group">
+                            <input id="customMinutes" type="number" min="1" max="180" step="1" inputmode="numeric" placeholder="e.g. 3" />
+                            <button class="btn btn-secondary" id="setCustomBtn" type="button">Set</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="timer-stage" id="timerStage" hidden>
+                <div class="timer-ring" aria-hidden="true">
+                    <svg viewBox="0 0 220 220">
+                        <circle class="ring-track" cx="110" cy="110" r="92"></circle>
+                        <circle class="ring-progress" id="ringProgress" cx="110" cy="110" r="92"></circle>
+                    </svg>
+                    <div class="timer-display">
+                        <div class="timer-label">Time Left</div>
+                        <div class="timer-time" id="timeDisplay">00:00</div>
+                    </div>
+                </div>
+
+                <div class="timer-actions">
+                    <button class="btn btn-primary" id="startPauseBtn" type="button">Start</button>
+                    <button class="btn btn-secondary" id="resetBtn" type="button">Reset</button>
+                </div>
+
+                <div class="timer-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Set Time</span>
+                        <span class="meta-value" id="setTimeDisplay">00:00</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Status</span>
+                        <span class="meta-value" id="statusDisplay">Ready</span>
+                    </div>
+                </div>
+
+                <div class="finish-message" id="finishMessage" hidden>
+                    Time's up! Great job! 🎉
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
