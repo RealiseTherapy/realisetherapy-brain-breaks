@@ -6,6 +6,38 @@ const state = {
     endTime: null
 };
 
+let audioCtx = null;
+
+function getAudioContext() {
+    try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {
+        audioCtx = null;
+    }
+    return audioCtx;
+}
+
+// Three short beeps generated with the Web Audio API (no external assets)
+function playAlert() {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    for (let i = 0; i < 3; i++) {
+        const t = ctx.currentTime + i * 0.6;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.5, t + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.5);
+    }
+}
+
 const timeDisplay = document.getElementById('timeDisplay');
 const setTimeDisplay = document.getElementById('setTimeDisplay');
 const statusDisplay = document.getElementById('statusDisplay');
@@ -78,11 +110,15 @@ function tick() {
         presetButtons.forEach(btn => btn.disabled = false);
         customMinutesInput.disabled = false;
         setCustomBtn.disabled = false;
+        playAlert();
     }
 }
 
 function startTimer() {
     if (state.duration <= 0) return;
+
+    // Unlock audio on a user gesture so the alert can play automatically later
+    getAudioContext();
 
     finishMessage.hidden = true;
     timerStage.classList.remove('finished');
