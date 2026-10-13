@@ -34,7 +34,7 @@ const teamColors = [
 // Each team has its own match sound (synthesised, no audio files needed)
 const teamSounds = [
     { type: 'sine',     notes: [523, 659, 784],       step: 0.12, volume: 0.25 }, // Team 1: bright rising arpeggio
-    { type: 'square',   notes: [392, 523],            step: 0.18, volume: 0.10 }, // Team 2: retro two-tone
+    { type: 'triangle', notes: [440, 554],            step: 0.18, volume: 0.14 }, // Team 2: softened pleasant two-tone
     { type: 'triangle', notes: [659, 784, 988, 1318], step: 0.09, volume: 0.25 }, // Team 3: fast sparkle
     { type: 'sawtooth', notes: [330, 440, 330, 440],  step: 0.12, volume: 0.08 }, // Team 4: buzzy wobble
     { type: 'sine',     notes: [880, 1175],           step: 0.20, volume: 0.25 }, // Team 5: bell ding
@@ -74,6 +74,35 @@ function playTeamSound(teamIndex) {
         });
     } catch (e) {
         // Sound is a bonus; never break the game if audio fails
+    }
+}
+
+// Subtle pop sound when a card is clicked/flipped
+function playCardFlipSound() {
+    try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioCtx) audioCtx = new AudioContextClass();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime + 0.001;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(680, now);
+        osc.frequency.exponentialRampToValueAtTime(420, now + 0.06);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.045, now + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+    } catch (e) {
+        // No-op if audio isn't available
     }
 }
 
@@ -262,6 +291,8 @@ function flipCard(index) {
         return;
     }
 
+    playCardFlipSound();
+
     gameState.flipped.push(index);
     renderBoard();
 
@@ -271,10 +302,16 @@ function flipCard(index) {
     }
 }
 
-function finishTurn() {
-    // Increment moves once per turn, then rotate to next team
+function finishTurn(wasMatch) {
+    // Increment moves once per completed guess pair
     gameState.moves++;
-    gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+
+    // Only rotate to next team when guess is incorrect.
+    // If it was a match, current team gets another turn.
+    if (!wasMatch) {
+        gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+    }
+
     gameState.flipped = [];
     gameState.isProcessing = false;
     updateGameInfo();
@@ -302,9 +339,9 @@ function checkMatch() {
 
             // This team's own sound, plus cards float up into their score
             playTeamSound(teamIndex);
-            flyCardsToScore([first, second], teamIndex).then(finishTurn);
+            flyCardsToScore([first, second], teamIndex).then(() => finishTurn(true));
         } else {
-            finishTurn();
+            finishTurn(false);
         }
     }, 1000);
 }
