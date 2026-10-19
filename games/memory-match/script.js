@@ -9,7 +9,9 @@ let gameState = {
     teams: [],
     currentTeamIndex: 0,
     teamScores: {},
-    cardTeams: {} // Track which team found each card
+    cardTeams: {},
+    gameOver: false,
+    finalRanking: []
 };
 
 // Emoji sets for different themes
@@ -21,26 +23,18 @@ const emojiSets = {
 };
 
 const teamColors = [
-    '#D62828', // red
-    '#2563EB', // blue
-    '#16A34A', // green
-    '#FACC15', // yellow
-    '#9333EA', // purple
-    '#F97316', // orange
-    '#14B8A6', // teal
-    '#7F1D1D'  // maroon
+    '#D62828', '#2563EB', '#16A34A', '#FACC15', '#9333EA', '#F97316', '#14B8A6', '#7F1D1D'
 ];
 
-// Each team has its own match sound (synthesised, no audio files needed)
 const teamSounds = [
-    { type: 'sine',     notes: [523, 659, 784],       step: 0.12, volume: 0.25 }, // Team 1: bright rising arpeggio
-    { type: 'triangle', notes: [440, 554],            step: 0.18, volume: 0.14 }, // Team 2: softened pleasant two-tone
-    { type: 'triangle', notes: [659, 784, 988, 1318], step: 0.09, volume: 0.25 }, // Team 3: fast sparkle
-    { type: 'sawtooth', notes: [330, 440, 330, 440],  step: 0.12, volume: 0.08 }, // Team 4: buzzy wobble
-    { type: 'sine',     notes: [880, 1175],           step: 0.20, volume: 0.25 }, // Team 5: bell ding
-    { type: 'square',   notes: [262, 330, 392, 523],  step: 0.10, volume: 0.10 }, // Team 6: arcade climb
-    { type: 'triangle', notes: [988, 784, 988],       step: 0.14, volume: 0.25 }, // Team 7: playful bounce
-    { type: 'sawtooth', notes: [196, 147],            step: 0.22, volume: 0.08 }  // Team 8: deep drop
+    { type: 'sine', notes: [523, 659, 784], step: 0.12, volume: 0.25 },
+    { type: 'triangle', notes: [440, 554], step: 0.18, volume: 0.14 },
+    { type: 'triangle', notes: [659, 784, 988, 1318], step: 0.09, volume: 0.25 },
+    { type: 'sawtooth', notes: [330, 440, 330, 440], step: 0.12, volume: 0.08 },
+    { type: 'sine', notes: [880, 1175], step: 0.20, volume: 0.25 },
+    { type: 'square', notes: [262, 330, 392, 523], step: 0.10, volume: 0.10 },
+    { type: 'triangle', notes: [988, 784, 988], step: 0.14, volume: 0.25 },
+    { type: 'sawtooth', notes: [196, 147], step: 0.22, volume: 0.08 }
 ];
 
 let audioCtx = null;
@@ -72,12 +66,9 @@ function playTeamSound(teamIndex) {
             osc.start(t);
             osc.stop(t + dur + 0.02);
         });
-    } catch (e) {
-        // Sound is a bonus; never break the game if audio fails
-    }
+    } catch (e) {}
 }
 
-// Subtle pop sound when a card is clicked/flipped
 function playCardFlipSound() {
     try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -101,12 +92,23 @@ function playCardFlipSound() {
         gain.connect(audioCtx.destination);
         osc.start(now);
         osc.stop(now + 0.08);
-    } catch (e) {
-        // No-op if audio isn't available
+    } catch (e) {}
+}
+
+function triggerConfetti() {
+    const colors = ['#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'];
+    for (let i = 0; i < 120; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = (Math.random() * 0.6) + 's';
+        piece.style.transform = `translateY(-10vh) rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2600);
     }
 }
 
-// Float matched cards up, then fly them into the scoring team's score box
 function flyCardsToScore(indices, teamIndex) {
     const board = document.getElementById('gameBoard');
     const scoreboard = document.getElementById('scoreboard');
@@ -149,11 +151,7 @@ function flyCardsToScore(indices, teamIndex) {
             { transform: 'translate(0px, 0px) scale(1)', opacity: 1, offset: 0 },
             { transform: 'translate(0px, -30px) scale(1.15)', opacity: 1, offset: 0.35 },
             { transform: `translate(${dx}px, ${dy}px) scale(0.2)`, opacity: 0, offset: 1 }
-        ], {
-            duration: 900,
-            easing: 'ease-in-out',
-            fill: 'forwards'
-        });
+        ], { duration: 900, easing: 'ease-in-out', fill: 'forwards' });
 
         animations.push(anim.finished.catch(() => {}).then(() => clone.remove()));
     });
@@ -161,27 +159,24 @@ function flyCardsToScore(indices, teamIndex) {
     return Promise.all(animations);
 }
 
-const difficultySettings = {
-    easy: 8,
-    medium: 12,
-    hard: 16
-};
+const difficultySettings = { easy: 8, medium: 12, hard: 16 };
 
-// Initialize team setup screen
 function initSetupScreen() {
     const difficultySelect = document.getElementById('difficulty');
-    if (difficultySelect) {
-        difficultySelect.value = 'easy';
-    }
-    
+    if (difficultySelect) difficultySelect.value = 'easy';
+
     updateTeamDisplay();
-    
+
     document.getElementById('decreaseTeamsBtn').addEventListener('click', decreaseTeams);
     document.getElementById('increaseTeamsBtn').addEventListener('click', increaseTeams);
     document.getElementById('startGameBtn').addEventListener('click', startGame);
+
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const backToGamesBtn = document.getElementById('backToGamesBtn');
+    if (playAgainBtn) playAgainBtn.addEventListener('click', playAgain);
+    if (backToGamesBtn) backToGamesBtn.addEventListener('click', backToGames);
 }
 
-// Update team count display
 function updateTeamDisplay() {
     const teamCountEl = document.getElementById('teamCount');
     const teamCount = parseInt(teamCountEl ? teamCountEl.textContent : '2', 10) || 2;
@@ -195,10 +190,8 @@ function updateTeamDisplay() {
     }
 
     const teamList = document.getElementById('teamList');
-    if (teamList) {
-        teamList.innerHTML = '';
-    }
-    
+    if (teamList) teamList.innerHTML = '';
+
     gameState.teams.forEach((team, index) => {
         const teamItem = document.createElement('div');
         teamItem.className = 'team-item';
@@ -239,11 +232,11 @@ function startGame() {
     gameState.matched = [];
     gameState.isProcessing = false;
     gameState.cardTeams = {};
-    gameState.teams = gameState.teams.length ? gameState.teams : ['Team 1', 'Team 2'];
+    gameState.gameOver = false;
+    gameState.finalRanking = [];
 
-    gameState.teams.forEach(team => {
-        gameState.teamScores[team] = 0;
-    });
+    gameState.teams = gameState.teams.length ? gameState.teams : ['Team 1', 'Team 2'];
+    gameState.teams.forEach(team => { gameState.teamScores[team] = 0; });
 
     const pairCount = difficultySettings[gameState.difficulty];
     const emojiSet = Object.values(emojiSets)[Math.floor(Math.random() * Object.keys(emojiSets).length)];
@@ -252,6 +245,9 @@ function startGame() {
 
     document.getElementById('setupScreen').style.display = 'none';
     document.getElementById('gameScreen').style.display = 'flex';
+
+    const podium = document.getElementById('podiumScreen');
+    if (podium) podium.style.display = 'none';
 
     renderBoard();
     updateScoreboard();
@@ -269,7 +265,6 @@ function renderBoard() {
         card.dataset.index = index;
 
         if (gameState.matched.includes(index)) {
-            // Matched cards have flown into their team's score; keep the empty slot
             card.textContent = emoji;
             card.classList.add('matched');
             card.disabled = true;
@@ -287,12 +282,10 @@ function renderBoard() {
 }
 
 function flipCard(index) {
-    if (gameState.flipped.includes(index) || gameState.matched.includes(index) || gameState.isProcessing) {
-        return;
-    }
+    if (gameState.gameOver) return;
+    if (gameState.flipped.includes(index) || gameState.matched.includes(index) || gameState.isProcessing) return;
 
     playCardFlipSound();
-
     gameState.flipped.push(index);
     renderBoard();
 
@@ -303,17 +296,12 @@ function flipCard(index) {
 }
 
 function finishTurn(wasMatch) {
-    // Increment moves once per completed guess pair
     gameState.moves++;
-
-    // Only rotate to next team when guess is incorrect.
-    // If it was a match, current team gets another turn.
-    if (!wasMatch) {
-        gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
-    }
+    if (!wasMatch) gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
 
     gameState.flipped = [];
     gameState.isProcessing = false;
+
     updateGameInfo();
     updateScoreboard();
     renderBoard();
@@ -337,7 +325,6 @@ function checkMatch() {
             gameState.cardTeams[first] = teamIndex;
             gameState.cardTeams[second] = teamIndex;
 
-            // This team's own sound, plus cards float up into their score
             playTeamSound(teamIndex);
             flyCardsToScore([first, second], teamIndex).then(() => finishTurn(true));
         } else {
@@ -346,32 +333,65 @@ function checkMatch() {
     }, 1000);
 }
 
-function announceWinner() {
-    const scores = Object.values(gameState.teamScores);
-    if (!scores.length) return;
+function buildRanking() {
+    return gameState.teams
+        .map((team, idx) => ({ team, score: gameState.teamScores[team] || 0, idx }))
+        .sort((a, b) => b.score - a.score || a.idx - b.idx);
+}
 
-    let maxScore = Math.max(...scores);
-    let winners = Object.entries(gameState.teamScores)
-        .filter(([_, score]) => score === maxScore)
-        .map(([team, _]) => team);
+function renderPodium() {
+    const podium = document.getElementById('podiumScreen');
+    const list = document.getElementById('podiumList');
+    const winnerLine = document.getElementById('winnerLine');
+    if (!podium || !list || !winnerLine) return;
 
-    let message = '🎉 Game Over! 🎉\n\n';
-    
-    if (winners.length === 1) {
-        message += `${winners[0]} wins! 🏆\n`;
-    } else {
-        message += `It's a tie between:\n${winners.join(', ')}\n`;
-    }
+    const ranking = buildRanking();
+    gameState.finalRanking = ranking;
 
-    message += `\nFinal Scores:\n`;
-    gameState.teams.forEach(team => {
-        message += `${team}: ${gameState.teamScores[team]} pairs\n`;
+    list.innerHTML = '';
+    ranking.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'podium-row';
+
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅';
+        row.innerHTML = `
+            <div class="podium-place">${i + 1}</div>
+            <div class="podium-medal">${medal}</div>
+            <div class="podium-team" style="color:${teamColors[item.idx % teamColors.length]}">${item.team}</div>
+            <div class="podium-score">${item.score} pair${item.score === 1 ? '' : 's'}</div>
+        `;
+        list.appendChild(row);
     });
 
-    message += `\nTotal Moves: ${gameState.moves}`;
+    const topScore = ranking[0] ? ranking[0].score : 0;
+    const tied = ranking.filter(r => r.score === topScore);
+    if (tied.length > 1) {
+        winnerLine.textContent = `🏁 Tie for 1st: ${tied.map(t => t.team).join(', ')} (${topScore})`;
+    } else if (ranking[0]) {
+        winnerLine.textContent = `🏆 Winner: ${ranking[0].team} with ${ranking[0].score} pair${ranking[0].score === 1 ? '' : 's'}!`;
+    } else {
+        winnerLine.textContent = 'Game complete!';
+    }
 
-    alert(message);
-    resetToSetup();
+    podium.style.display = 'flex';
+    triggerConfetti();
+}
+
+function announceWinner() {
+    gameState.gameOver = true;
+    const gameScreen = document.getElementById('gameScreen');
+    if (gameScreen) gameScreen.style.display = 'none';
+    renderPodium();
+}
+
+function playAgain() {
+    const podium = document.getElementById('podiumScreen');
+    if (podium) podium.style.display = 'none';
+    startGame();
+}
+
+function backToGames() {
+    window.location.href = '/games/';
 }
 
 function updateScoreboard() {
@@ -382,22 +402,19 @@ function updateScoreboard() {
         const color = teamColors[index % teamColors.length];
         const card = document.createElement('div');
         card.className = 'team-score-card';
-        if (index === gameState.currentTeamIndex) {
-            card.classList.add('active');
-        }
+        if (index === gameState.currentTeamIndex && !gameState.gameOver) card.classList.add('active');
 
         card.innerHTML = `
             <div class="team-name">${team}</div>
             <div class="team-score">${gameState.teamScores[team]}</div>
         `;
-        // Styling (filled vs. white) is handled in CSS via --team-color
         card.style.setProperty('--team-color', color);
         scoreboard.appendChild(card);
     });
 
     const indicator = document.getElementById('currentTeamIndicator');
     const currentTeam = gameState.teams[gameState.currentTeamIndex];
-    if (!currentTeam) {
+    if (!currentTeam || gameState.gameOver) {
         indicator.innerHTML = '';
         return;
     }
@@ -416,14 +433,21 @@ function updateGameInfo() {
 function resetToSetup() {
     const gameScreen = document.getElementById('gameScreen');
     const setupScreen = document.getElementById('setupScreen');
+    const podium = document.getElementById('podiumScreen');
+
     if (gameScreen) gameScreen.style.display = 'none';
+    if (podium) podium.style.display = 'none';
     if (setupScreen) setupScreen.style.display = 'flex';
+
     gameState.flipped = [];
     gameState.matched = [];
     gameState.cards = [];
     gameState.moves = 0;
     gameState.isProcessing = false;
     gameState.cardTeams = {};
+    gameState.gameOver = false;
+    gameState.finalRanking = [];
+
     updateGameInfo();
 }
 
