@@ -1,125 +1,609 @@
-/* Existing styles assumed above this file; add/append these rules */
-
-#podiumScreen {
-  position: fixed;
-  inset: 0;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at 20% 20%, #1f2937, #0b1020 65%);
-  color: #fff;
-  z-index: 9999;
-  padding: 24px;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.podium-card {
-  width: min(860px, 95vw);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px);
-  border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-  padding: 20px;
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
 }
 
-.podium-title {
-  text-align: center;
-  font-size: clamp(1.4rem, 2.7vw, 2rem);
-  margin-bottom: 8px;
-  font-weight: 800;
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#winnerLine {
-  text-align: center;
-  margin-bottom: 16px;
-  opacity: 0.95;
-  font-weight: 600;
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
 }
 
-#podiumList {
-  display: grid;
-  gap: 10px;
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    position: relative;
+    flex-shrink: 0;
+    height: 35px;
 }
 
-.podium-row {
-  display: grid;
-  grid-template-columns: 52px 52px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.09);
+.back-button {
+    position: absolute;
+    left: 0;
+    color: white;
+    text-decoration: none;
+    font-size: 0.85em;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: background 0.3s;
 }
 
-.podium-row:nth-child(1) {
-  background: linear-gradient(90deg, rgba(245, 158, 11, 0.26), rgba(255, 255, 255, 0.10));
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
-.podium-place {
-  font-weight: 800;
-  font-size: 1.1rem;
-  text-align: center;
+h1 {
+    color: white;
+    font-size: clamp(1.2em, 4vw, 1.8em);
+    text-align: center;
 }
 
-.podium-medal {
-  font-size: 1.4rem;
-  text-align: center;
+h2 {
+    color: white;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    text-align: center;
 }
 
-.podium-team {
-  font-weight: 700;
+h3 {
+    color: #667eea;
+    margin-bottom: 8px;
+    font-size: 0.9em;
 }
 
-.podium-score {
-  font-weight: 700;
-  opacity: 0.95;
+/* Setup Screen */
+.setup-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
-.podium-actions {
-  margin-top: 16px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
+.setup-content {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 450px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
-.podium-actions button {
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-weight: 700;
-  cursor: pointer;
+.setup-section {
+    margin-bottom: 20px;
 }
 
-#playAgainBtn {
-  background: #22c55e;
-  color: #07130a;
+.setup-section label {
+    display: block;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 0.95em;
 }
 
-#backToGamesBtn {
-  background: #e5e7eb;
-  color: #111827;
+.setup-section select {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.95em;
+    border: 2px solid #667eea;
+    border-radius: 6px;
+    cursor: pointer;
+    background: white;
+    color: #333;
 }
 
-.confetti-piece {
-  position: fixed;
-  top: -12px;
-  width: 10px;
-  height: 14px;
-  border-radius: 2px;
-  z-index: 10000;
-  pointer-events: none;
-  animation: confetti-fall 2.4s linear forwards;
+.team-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: #f0f0f0;
+    padding: 15px;
+    border-radius: 8px;
 }
 
-@keyframes confetti-fall {
-  0% {
-    transform: translateY(-10vh) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(115vh) rotate(720deg);
-    opacity: 0.95;
-  }
+.team-count {
+    font-size: 2em;
+    font-weight: bold;
+    color: #667eea;
+    min-width: 50px;
+    text-align: center;
+}
+
+.btn-small {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3em;
+    padding: 0;
+    border-radius: 6px;
+}
+
+.team-list {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.team-item {
+    padding: 10px;
+    margin-bottom: 6px;
+    background: white;
+    border-left: 4px solid #667eea;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9em;
+}
+
+/* Game Screen */
+.game-screen {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.scoreboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 6px;
+    flex-shrink: 0;
+    height: 70px;
+    padding: 0;
+}
+
+/* Default (not their turn): filled with team colour, white text */
+.team-score-card {
+    background: var(--team-color);
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    border: 8px solid var(--team-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    position: relative;
+}
+
+.team-score-card .team-name {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    position: relative;
+    z-index: 1;
+}
+
+.team-score-card .team-score {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    position: relative;
+    z-index: 1;
+}
+
+/* Active (their turn): white box with team-coloured border */
+.team-score-card.active {
+    background: white;
+    border-color: var(--team-color);
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.team-score-card.active .team-name {
+    color: #666;
+    text-shadow: none;
+}
+
+.team-score-card.active .team-score {
+    color: var(--team-color);
+    text-shadow: none;
+}
+
+.team-name {
+    color: #666;
+    font-size: 0.65em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+}
+
+.team-score {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.current-team-indicator {
+    background: white;
+    padding: 8px 10px;
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 4px auto 0;
+    width: 100%;
+    max-width: 220px;
+}
+
+.current-team-text {
+    color: #666;
+    font-size: 0.65em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+}
+
+.current-team-name {
+    font-size: clamp(0.9em, 3vw, 1.2em);
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.game-info {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-shrink: 0;
+    height: 50px;
+    margin-top: 4px;
+}
+
+.info-item {
+    background: white;
+    padding: 6px 15px;
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.info-label {
+    display: block;
+    color: #666;
+    font-size: 0.65em;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    display: block;
+    color: #667eea;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    flex: 1;
+    min-height: 0;
+    aspect-ratio: 1;
+    margin-top: 6px;
+}
+
+.card {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: clamp(1.5em, 4vw, 2.8em);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    user-select: none;
+    padding: 0;
+    flex-shrink: 0;
+    color: white;
+    font-weight: 700;
+}
+
+.card:not(.flipped):not(.matched) {
+    color: white;
+    font-weight: 700;
+}
+
+.card.flipped {
+    background: white;
+    color: #667eea;
+    box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card.matched {
+    background: #4ade80;
+    color: white;
+    cursor: default;
+    animation: pulse 0.5s ease-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.card.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    height: 45px;
+    padding: 5px 0;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: clamp(0.8em, 2vw, 0.95em);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    height: fit-content;
+}
+
+.btn-primary {
+    background: white;
+    color: #667eea;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.instructions {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    display: none;
+    font-size: 0.8em;
+}
+
+.instructions p {
+    color: #666;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+    .game-board {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+        gap: 6px;
+    }
+
+    .header {
+        margin-bottom: 6px;
+        gap: 10px;
+        height: 30px;
+    }
+
+    .game-board {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .scoreboard {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+        height: 60px;
+    }
+
+    .team-score-card {
+        padding: 6px;
+    }
+
+    .team-score {
+        font-size: 1.3em;
+    }
+
+    .current-team-indicator {
+        padding: 6px;
+        height: 45px;
+    }
+
+    .game-info {
+        gap: 8px;
+        height: 45px;
+    }
+
+    .info-item {
+        padding: 6px 12px;
+        min-width: 70px;
+    }
+
+    .info-value {
+        font-size: 1.1em;
+    }
+
+    .btn {
+        padding: 8px 16px;
+    }
+
+    .controls {
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+        gap: 5px;
+    }
+
+    .back-button {
+        position: static;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 4px;
+    }
+
+    h1 {
+        font-size: 1.1em;
+    }
+
+    .header {
+        height: 28px;
+        margin-bottom: 4px;
+    }
+
+    .game-board {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        padding: 6px;
+    }
+
+    .card {
+        font-size: clamp(1.1em, 3vw, 1.7em);
+    }
+
+    .scoreboard {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        height: 55px;
+    }
+
+    .team-score-card {
+        padding: 6px;
+    }
+
+    .current-team-indicator {
+        padding: 6px;
+        height: 40px;
+    }
+
+    .current-team-name {
+        font-size: 1em;
+    }
+
+    .team-score {
+        font-size: 1.2em;
+    }
+
+    .game-info {
+        gap: 6px;
+        height: 40px;
+    }
+
+    .info-item {
+        padding: 5px 10px;
+        min-width: 60px;
+    }
+
+    .info-label {
+        font-size: 0.6em;
+    }
+
+    .info-value {
+        font-size: 1em;
+    }
+
+    .controls {
+        gap: 6px;
+        height: 38px;
+    }
+
+    .btn {
+        padding: 8px 14px;
+        font-size: 0.8em;
+    }
 }
