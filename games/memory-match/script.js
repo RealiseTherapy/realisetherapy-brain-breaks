@@ -347,31 +347,61 @@ function checkMatch() {
 }
 
 function announceWinner() {
-    const scores = Object.values(gameState.teamScores);
-    if (!scores.length) return;
+    if (!gameState.teams.length) return;
 
-    let maxScore = Math.max(...scores);
-    let winners = Object.entries(gameState.teamScores)
-        .filter(([_, score]) => score === maxScore)
-        .map(([team, _]) => team);
+    const standings = gameState.teams
+        .map((team, index) => ({ team, score: gameState.teamScores[team], index }))
+        .sort((a, b) => b.score - a.score || a.index - b.index);
+    const highestScore = standings[0].score;
+    const winnerCount = standings.filter(team => team.score === highestScore).length;
+    const podiumTitle = document.getElementById('podiumTitle');
+    const podiumSubtitle = document.getElementById('podiumSubtitle');
+    const podiumResults = document.getElementById('podiumResults');
 
-    let message = '🎉 Game Over! 🎉\n\n';
-    
-    if (winners.length === 1) {
-        message += `${winners[0]} wins! 🏆\n`;
-    } else {
-        message += `It's a tie between:\n${winners.join(', ')}\n`;
-    }
+    podiumTitle.textContent = winnerCount > 1 ? "It's a tie!" : `${standings[0].team} wins!`;
+    podiumSubtitle.textContent = `Final scores · ${gameState.moves} total moves`;
+    podiumResults.innerHTML = '';
 
-    message += `\nFinal Scores:\n`;
-    gameState.teams.forEach(team => {
-        message += `${team}: ${gameState.teamScores[team]} pairs\n`;
+    let place = 0;
+    standings.forEach((result, index) => {
+        if (index === 0 || result.score < standings[index - 1].score) {
+            place = index + 1;
+        }
+
+        const row = document.createElement('li');
+        row.className = 'podium-result';
+        if (result.score === highestScore) row.classList.add('podium-winner');
+
+        const medal = place === 1 ? '🥇' : place === 2 ? '🥈' : place === 3 ? '🥉' : '';
+        const placeLabel = place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`;
+        row.innerHTML = `
+            <span class="podium-place">${medal || placeLabel}</span>
+            <span class="podium-team">${result.team}${result.score === highestScore ? '<span class="podium-winner-label">Winner</span>' : ''}</span>
+            <span class="podium-points">${result.score} ${result.score === 1 ? 'point' : 'points'}</span>
+        `;
+        podiumResults.appendChild(row);
     });
 
-    message += `\nTotal Moves: ${gameState.moves}`;
+    document.getElementById('podiumScreen').hidden = false;
+    showPodiumConfetti();
+}
 
-    alert(message);
-    resetToSetup();
+function showPodiumConfetti() {
+    const confetti = document.getElementById('podiumConfetti');
+    const colors = ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#ffffff', '#9b5de5'];
+    confetti.innerHTML = '';
+
+    for (let i = 0; i < 70; i++) {
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.setProperty('--confetti-color', colors[i % colors.length]);
+        piece.style.setProperty('--confetti-drift', `${Math.random() * 180 - 90}px`);
+        piece.style.animationDelay = `${Math.random() * 1.8}s`;
+        piece.style.animationDuration = `${2.8 + Math.random() * 2.2}s`;
+        piece.addEventListener('animationend', () => piece.remove(), { once: true });
+        confetti.appendChild(piece);
+    }
 }
 
 function updateScoreboard() {
@@ -414,6 +444,8 @@ function updateGameInfo() {
 }
 
 function resetToSetup() {
+    document.getElementById('podiumScreen').hidden = true;
+    document.getElementById('podiumConfetti').innerHTML = '';
     const gameScreen = document.getElementById('gameScreen');
     const setupScreen = document.getElementById('setupScreen');
     if (gameScreen) gameScreen.style.display = 'none';
@@ -428,4 +460,5 @@ function resetToSetup() {
 }
 
 document.getElementById('resetBtn').addEventListener('click', resetToSetup);
+document.getElementById('playAgainBtn').addEventListener('click', resetToSetup);
 window.addEventListener('load', initSetupScreen);
