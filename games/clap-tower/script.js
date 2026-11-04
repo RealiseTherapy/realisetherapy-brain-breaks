@@ -13,6 +13,33 @@ let tower = null, cur = null, falling = [], score = 0, camY = 0, speed = 220, st
 let best = +localStorage.getItem('clapTowerBest') || 0;
 $('best').textContent = best;
 
+// ---- rhythm: 110 BPM in 4/4, ideal clap on beat 1 of each bar ----
+const BPM = 110, BAR = 4 * 60 / BPM;
+const music = new Audio();
+music.loop = true;
+let musicReady = false, loops = 0, lastCT = 0;
+
+function songTime() {
+    if (music.currentTime < lastCT - 0.5) loops++;
+    lastCT = music.currentTime;
+    return loops * (music.duration || 0) + music.currentTime;
+}
+const offsetSec = () => +$('offset').value || 0;
+const nextDown = t => offsetSec() + Math.ceil((t - offsetSec()) / BAR - 1e-9) * BAR;
+
+function loadTrack(src, name) {
+    music.src = src;
+    music.load();
+    musicReady = true;
+    $('trackStatus').textContent = 'Backing track: ' + name + ' (clap on beat 1!)';
+}
+$('track').onchange = e => {
+    const f = e.target.files[0];
+    if (f) loadTrack(URL.createObjectURL(f), f.name);
+};
+// Auto-load games/clap-tower/beat.mp3 if it has been added to the repo
+fetch('beat.mp3', { method: 'HEAD' }).then(r => { if (r.ok) loadTrack('beat.mp3', 'beat.mp3'); }).catch(() => {});
+
 const hue = n => (n * 28) % 360;
 
 function reset() {
@@ -28,6 +55,13 @@ function spawn() {
     const top = tower[tower.length - 1];
     const w = 70 + Math.random() * Math.min(260, W * 0.45); // varied lengths
     cur = { x: W, w, i: top.i + 1 };
+    if (musicReady) {
+        // aim to be centred on the tower exactly on a downbeat, arriving from the right edge
+        const t = songTime();
+        cur.cx = top.x + top.w / 2 - w / 2;
+        cur.target = nextDown(t + (W - cur.cx) / speed);
+        cur.x = cur.cx + (cur.target - t) * speed;
+    }
 }
 
 function drop() {
@@ -51,6 +85,7 @@ function drop() {
 
 function gameOver() {
     state = 'over';
+    music.pause();
     if (score > best) {
         best = score;
         localStorage.setItem('clapTowerBest', best);
@@ -67,6 +102,12 @@ function begin() {
     $('overlay').classList.add('hide');
     reset();
     state = 'play';
+    if (musicReady) {
+        music.currentTime = 0; loops = 0; lastCT = 0;
+        music.play().catch(() => {});
+    } else {
+        music.pause();
+    }
 }
 
 // ---- microphone ----
@@ -144,9 +185,16 @@ function frame(now) {
     prev = now;
     pollMic(now);
     if (state === 'play' && cur) {
-        cur.x -= speed * dt;
-        if (cur.x + cur.w < 0) cur.x = W;
+        if (cur.target !== undefined) {
+            const t = songTime();
+            if (cur.cx + (cur.target - t) * speed + cur.w < 0) cur.target += BAR; // missed: wait for next bar
+            cur.x = cur.cx + (cur.target - t) * speed;
+        } else {
+            cur.x -= speed * dt;
+            if (cur.x + cur.w < 0) cur.x = W;
+        }
     }
+    updateBeats();
     for (const f of falling) { f.vy += 1800 * dt; f.y += f.vy * dt; }
     falling = falling.filter(f => f.y < H * 2);
     if (tower) {
@@ -155,6 +203,16 @@ function frame(now) {
     }
     draw();
     requestAnimationFrame(frame);
+}
+
+function updateBeats() {
+    const dots = $('beats').children;
+    let beat = -1;
+    if (state === 'play' && musicReady) {
+        const p = (((songTime() - offsetSec()) % BAR) + BAR) % BAR;
+        beat = Math.floor(p / (BAR / 4));
+    }
+    for (let i = 0; i < 4; i++) dots[i].classList.toggle('on', i === beat);
 }
 
 function block(x, y, w, i, a = 1) {

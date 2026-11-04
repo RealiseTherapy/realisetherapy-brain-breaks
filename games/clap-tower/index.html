@@ -18,6 +18,7 @@
             <div>Best: <b id="best">0</b></div>
             <div class="mic">🎤 <span class="meter"><span id="level"></span><span id="thr"></span></span></div>
             <label>Sensitivity <input id="sens" type="range" min="1" max="100" value="60"></label>
+            <div id="beats" title="Beat counter (clap on 1)"><i></i><i></i><i></i><i></i></div>
         </div>
 
         <div class="stage">
@@ -26,6 +27,9 @@
                 <h2 id="title">👏 Clap Tower</h2>
                 <p id="msg">Clap to stop the sliding block. Anything hanging over gets chopped off!</p>
                 <p id="micStatus" class="status"></p>
+                <p class="status" id="trackStatus">No backing track loaded (free mode).</p>
+                <label class="secondary file">🎵 Choose 110 BPM track <input id="track" type="file" accept="audio/*" hidden></label>
+                <label class="offset">First beat 1 at <input id="offset" type="number" step="0.01" min="0" value="0"> sec</label>
                 <button id="start">Start (allow microphone)</button>
                 <button id="startNoMic" class="secondary">Play without microphone</button>
             </div>
