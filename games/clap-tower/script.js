@@ -59,7 +59,9 @@ function spawn() {
         // aim to be centred on the tower exactly on a downbeat, arriving from the right edge
         const t = songTime();
         cur.cx = top.x + top.w / 2 - w / 2;
-        cur.target = nextDown(t + (W - cur.cx) / speed);
+        // first block waits until one full loop of the track has played
+        const earliest = Math.max(t + (W - cur.cx) / speed, top.i === 0 ? (music.duration || 0) : 0);
+        cur.target = nextDown(earliest);
         cur.x = cur.cx + (cur.target - t) * speed;
     }
 }
@@ -100,14 +102,11 @@ function gameOver() {
 
 function begin() {
     $('overlay').classList.add('hide');
+    music.pause();
+    music.currentTime = 0; loops = 0; lastCT = 0;
     reset();
     state = 'play';
-    if (musicReady) {
-        music.currentTime = 0; loops = 0; lastCT = 0;
-        music.play().catch(() => {});
-    } else {
-        music.pause();
-    }
+    if (musicReady) music.play().catch(() => {});
 }
 
 // ---- microphone ----
@@ -233,6 +232,12 @@ function draw() {
     ctx.fillRect(0, H - 24 + camY, W, 200);
     for (const b of tower) block(b.x, baseY - b.i * BLOCK_H, b.w, b.i);
     for (const f of falling) block(f.x, baseY - f.i * BLOCK_H + f.y, f.w, f.i, 0.8);
+    if (cur && cur.target !== undefined && tower.length === 1 && cur.target - songTime() > 0.05 && cur.x > W) {
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 28px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎧 Listen to the beat… clap on 1!', W / 2, H / 3);
+    }
     if (cur) {
         block(cur.x, baseY - cur.i * BLOCK_H, cur.w, cur.i);
         const t = tower[tower.length - 1];
