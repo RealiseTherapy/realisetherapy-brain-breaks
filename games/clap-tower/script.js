@@ -13,9 +13,10 @@ let tower = null, cur = null, falling = [], score = 0, camY = 0, speed = 220, st
 let best = +localStorage.getItem('clapTowerBest') || 0;
 $('best').textContent = best;
 
-// ---- rhythm: 110 BPM in 4/4, ideal clap on beat 1 of each bar ----
+// ---- rhythm: 4/4, ideal clap on beat 1 of each bar ----
 // Timing uses the Web Audio clock (sample-accurate) rather than <audio>.currentTime.
-const BPM = 110, BEAT = 60 / BPM, BAR = 4 * BEAT;
+const BPM = 100, BEAT = 60 / BPM, BAR = 4 * BEAT; // must match the track's tempo
+const FIRST_BEAT = 0.035; // first beat sits ~35 ms into beat.mp3
 let audioCtx = null, musicBuf = null, musicSrc = null, loopLen = 0, T0 = 0, musicReady = false;
 const getCtx = () => audioCtx || (audioCtx = new (window.AudioContext || window.webkitAudioContext)());
 
@@ -57,7 +58,7 @@ function stopMusic() {
 
 function startMusic() {
     const c = getCtx();
-    T0 = c.currentTime + 4 * BEAT + 0.15; // 4-3-2-1 countdown, then music begins on beat 1
+    T0 = c.currentTime + 4 * BEAT + 0.15; // beat 1 of the first bar; music starts FIRST_BEAT early
     for (let k = 0; k < 4; k++) {
         const o = c.createOscillator(), g = c.createGain(), t = T0 - (4 - k) * BEAT;
         o.frequency.value = k === 3 ? 1320 : 880;
@@ -72,7 +73,7 @@ function startMusic() {
     musicSrc.loopStart = 0;
     musicSrc.loopEnd = loopLen;
     musicSrc.connect(c.destination);
-    musicSrc.start(T0);
+    musicSrc.start(T0 - FIRST_BEAT);
 }
 
 const hue = n => (n * 28) % 360;
@@ -93,7 +94,7 @@ function spawn() {
     if (musicReady) {
         // aim to be centred on the tower exactly on a downbeat, arriving from the right edge
         const t = songTime();
-        cur.cx = top.x + top.w / 2 - w / 2;
+        cur.cx = W / 2 - w / 2; // block centre reaches page centre on the downbeat
         cur.target = nextDown(Math.max(0, t + (W - cur.cx) / speed));
         cur.x = cur.cx + (cur.target - t) * speed;
     }
