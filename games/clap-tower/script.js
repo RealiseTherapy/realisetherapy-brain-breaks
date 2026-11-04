@@ -95,7 +95,9 @@ function gameOver() {
     }
     $('title').textContent = 'Tower height: ' + score;
     $('msg').textContent = score > 0 && score >= best ? 'New best! 🎉' : 'Nice try!';
-    $('start').textContent = 'Play again';
+    $('start').textContent = '▶ Play again';
+    $('start').hidden = !micOn;
+    $('enableMic').hidden = micOn;
     $('startNoMic').hidden = micOn;
     $('overlay').classList.remove('hide');
 }
@@ -167,13 +169,19 @@ function pollMic(now) {
     baseline = baseline * 0.98 + peak * 0.02;
 }
 
-$('start').onclick = async () => {
+$('enableMic').onclick = async () => {
     setStatus('');
-    const ok = await initMic();
-    if (ok) begin();
-    else $('startNoMic').hidden = false;
+    if (await initMic()) {
+        setStatus('Microphone ready ✔ – press Start when the class is ready.');
+        $('enableMic').hidden = true;
+        $('startNoMic').hidden = true;
+        $('start').hidden = false;
+    } else {
+        $('startNoMic').hidden = false;
+    }
 };
-$('startNoMic').onclick = begin;
+$('start').onclick = begin;
+$('startNoMic').onclick = () => begin();
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); drop(); } });
 cv.addEventListener('pointerdown', drop);
 
