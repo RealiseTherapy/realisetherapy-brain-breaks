@@ -14,31 +14,66 @@ let best = +localStorage.getItem('clapTowerBest') || 0;
 $('best').textContent = best;
 
 // ---- rhythm: 110 BPM in 4/4, ideal clap on beat 1 of each bar ----
-const BPM = 110, BAR = 4 * 60 / BPM;
-const music = new Audio();
-music.loop = true;
-let musicReady = false, loops = 0, lastCT = 0;
+// Timing uses the Web Audio clock (sample-accurate) rather than <audio>.currentTime.
+const BPM = 110, BEAT = 60 / BPM, BAR = 4 * BEAT;
+let audioCtx = null, musicBuf = null, musicSrc = null, loopLen = 0, T0 = 0, musicReady = false;
+const getCtx = () => audioCtx || (audioCtx = new (window.AudioContext || window.webkitAudioContext)());
 
+$('offset').value = localStorage.getItem('clapTowerNudge') || 0;
+$('offset').onchange = () => localStorage.setItem('clapTowerNudge', $('offset').value);
+const nudge = () => (+$('offset').value || 0) / 1000;
+
+// Time (s) relative to the first downbeat, matched to what the audience actually hears.
 function songTime() {
-    if (music.currentTime < lastCT - 0.5) loops++;
-    lastCT = music.currentTime;
-    return loops * (music.duration || 0) + music.currentTime;
+    if (!audioCtx) return 0;
+    const lat = (audioCtx.outputLatency || 0) + (audioCtx.baseLatency || 0);
+    return audioCtx.currentTime - lat - T0 - nudge();
 }
-const offsetSec = () => +$('offset').value || 0;
-const nextDown = t => offsetSec() + Math.ceil((t - offsetSec()) / BAR - 1e-9) * BAR;
+const nextDown = t => Math.ceil(t / BAR - 1e-9) * BAR;
 
-function loadTrack(src, name) {
-    music.src = src;
-    music.load();
+async function loadTrack(data, name) {
+    try {
+        musicBuf = await getCtx().decodeAudioData(data);
+    } catch (e) {
+        $('trackStatus').textContent = 'Could not read that audio file.';
+        return;
+    }
+    // Loop on a whole number of bars so the beat never drifts
+    const bars = Math.max(1, Math.round(musicBuf.duration / BAR));
+    loopLen = bars * BAR <= musicBuf.duration ? bars * BAR : musicBuf.duration;
     musicReady = true;
-    $('trackStatus').textContent = 'Backing track: ' + name + ' (clap on beat 1!)';
+    $('trackStatus').textContent = 'Backing track: ' + name + ' (' + bars + ' bars) – clap on beat 1!';
 }
-$('track').onchange = e => {
+$('track').onchange = async e => {
     const f = e.target.files[0];
-    if (f) loadTrack(URL.createObjectURL(f), f.name);
+    if (f) loadTrack(await f.arrayBuffer(), f.name);
 };
 // Auto-load games/clap-tower/beat.mp3 if it has been added to the repo
-fetch('beat.mp3', { method: 'HEAD' }).then(r => { if (r.ok) loadTrack('beat.mp3', 'beat.mp3'); }).catch(() => {});
+fetch('beat.mp3').then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(d => loadTrack(d, 'beat.mp3')).catch(() => {});
+
+function stopMusic() {
+    if (musicSrc) { try { musicSrc.stop(); } catch (e) {} musicSrc = null; }
+}
+
+function startMusic() {
+    const c = getCtx();
+    T0 = c.currentTime + 4 * BEAT + 0.15; // 4-3-2-1 countdown, then music begins on beat 1
+    for (let k = 0; k < 4; k++) {
+        const o = c.createOscillator(), g = c.createGain(), t = T0 - (4 - k) * BEAT;
+        o.frequency.value = k === 3 ? 1320 : 880;
+        g.gain.setValueAtTime(0.25, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        o.connect(g).connect(c.destination);
+        o.start(t); o.stop(t + 0.15);
+    }
+    musicSrc = c.createBufferSource();
+    musicSrc.buffer = musicBuf;
+    musicSrc.loop = true;
+    musicSrc.loopStart = 0;
+    musicSrc.loopEnd = loopLen;
+    musicSrc.connect(c.destination);
+    musicSrc.start(T0);
+}
 
 const hue = n => (n * 28) % 360;
 
@@ -59,9 +94,7 @@ function spawn() {
         // aim to be centred on the tower exactly on a downbeat, arriving from the right edge
         const t = songTime();
         cur.cx = top.x + top.w / 2 - w / 2;
-        // first block waits until one full loop of the track has played
-        const earliest = Math.max(t + (W - cur.cx) / speed, top.i === 0 ? (music.duration || 0) : 0);
-        cur.target = nextDown(earliest);
+        cur.target = nextDown(Math.max(0, t + (W - cur.cx) / speed));
         cur.x = cur.cx + (cur.target - t) * speed;
     }
 }
@@ -87,7 +120,7 @@ function drop() {
 
 function gameOver() {
     state = 'over';
-    music.pause();
+    stopMusic();
     if (score > best) {
         best = score;
         localStorage.setItem('clapTowerBest', best);
@@ -102,17 +135,18 @@ function gameOver() {
     $('overlay').classList.remove('hide');
 }
 
-function begin() {
+async function begin() {
+    await getCtx().resume();
     $('overlay').classList.add('hide');
-    music.pause();
-    music.currentTime = 0; loops = 0; lastCT = 0; env = 0;
+    stopMusic();
+    env = 0;
+    if (musicReady) startMusic();
     reset();
     state = 'play';
-    if (musicReady) music.play().catch(() => {});
 }
 
 // ---- microphone ----
-let audioCtx = null, analyser = null, buf = null, micOn = false, lastClap = 0, baseline = 0.01, env = 0;
+let analyser = null, buf = null, micOn = false, lastClap = 0, baseline = 0.01, env = 0;
 
 function setStatus(t) { $('micStatus').textContent = t; }
 
@@ -128,7 +162,7 @@ async function initMic() {
         return false;
     }
     // Created inside the click handler so the browser lets audio run
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    getCtx();
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false }
@@ -220,8 +254,8 @@ function updateBeats() {
     const dots = $('beats').children;
     let beat = -1;
     if (state === 'play' && musicReady) {
-        const p = (((songTime() - offsetSec()) % BAR) + BAR) % BAR;
-        beat = Math.floor(p / (BAR / 4));
+        const st = songTime();
+        if (st >= 0) beat = Math.floor((st % BAR) / BEAT);
     }
     for (let i = 0; i < 4; i++) dots[i].classList.toggle('on', i === beat);
 }
@@ -244,11 +278,15 @@ function draw() {
     ctx.fillRect(0, H - 24 + camY, W, 200);
     for (const b of tower) block(b.x, baseY - b.i * BLOCK_H, b.w, b.i);
     for (const f of falling) block(f.x, baseY - f.i * BLOCK_H + f.y, f.w, f.i, 0.8);
-    if (cur && cur.target !== undefined && tower.length === 1 && cur.target - songTime() > 0.05 && cur.x > W) {
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 28px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('🎧 Listen to the beat… clap on 1!', W / 2, H / 3);
+    if (state === 'play' && musicReady) {
+        const st = songTime();
+        if (st < 0 && st >= -4 * BEAT) {
+            const n = Math.ceil(-st / BEAT), frac = 1 - ((-st) % BEAT) / BEAT;
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold ' + Math.round(H * 0.3 * (1 + 0.25 * (1 - frac))) + 'px Arial';
+            ctx.fillText(n, W / 2, H * 0.42);
+        }
     }
     if (cur) {
         block(cur.x, baseY - cur.i * BLOCK_H, cur.w, cur.i);
