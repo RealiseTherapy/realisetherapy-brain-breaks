@@ -1,0 +1,190 @@
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const $ = id => document.getElementById(id);
+let W, H;
+function resize() {
+    W = cv.width = cv.clientWidth;
+    H = cv.height = cv.clientHeight;
+}
+addEventListener('resize', resize);
+resize();
+
+const BLOCK_H = 36;
+let tower = null, cur = null, falling = [], score = 0, camY = 0, speed = 220, state = 'menu';
+let best = +localStorage.getItem('clapTowerBest') || 0;
+$('best').textContent = best;
+
+const hue = n => (n * 28) % 360;
+
+function reset() {
+    resize();
+    const w = Math.min(260, W * 0.4);
+    tower = [{ x: W / 2 - w / 2, w, i: 0 }];
+    falling = []; score = 0; camY = 0; speed = 220;
+    $('score').textContent = 0;
+    spawn();
+}
+
+function spawn() {
+    const top = tower[tower.length - 1];
+    const w = 70 + Math.random() * Math.min(260, W * 0.45); // varied lengths
+    cur = { x: W, w, i: top.i + 1 };
+}
+
+function drop() {
+    if (state !== 'play' || !cur) return;
+    const top = tower[tower.length - 1];
+    const left = Math.max(cur.x, top.x), right = Math.min(cur.x + cur.w, top.x + top.w);
+    if (right - left <= 0) {
+        falling.push({ x: cur.x, w: cur.w, i: cur.i, y: 0, vy: 0 });
+        cur = null;
+        return gameOver();
+    }
+    if (cur.x < left) falling.push({ x: cur.x, w: left - cur.x, i: cur.i, y: 0, vy: 0 });
+    if (cur.x + cur.w > right) falling.push({ x: right, w: cur.x + cur.w - right, i: cur.i, y: 0, vy: 0 });
+    tower.push({ x: left, w: right - left, i: cur.i });
+    score = tower.length - 1;
+    $('score').textContent = score;
+    speed = Math.min(220 + score * 12, 700);
+    if (right - left < 4) { cur = null; return gameOver(); }
+    spawn();
+}
+
+function gameOver() {
+    state = 'over';
+    if (score > best) {
+        best = score;
+        localStorage.setItem('clapTowerBest', best);
+        $('best').textContent = best;
+    }
+    $('title').textContent = 'Tower height: ' + score;
+    $('msg').textContent = score > 0 && score >= best ? 'New best! 🎉' : 'Nice try!';
+    $('start').textContent = 'Play again';
+    $('startNoMic').hidden = micOn;
+    $('overlay').classList.remove('hide');
+}
+
+function begin() {
+    $('overlay').classList.add('hide');
+    reset();
+    state = 'play';
+}
+
+// ---- microphone ----
+let audioCtx = null, analyser = null, buf = null, micOn = false, lastClap = 0, baseline = 0.01;
+
+function setStatus(t) { $('micStatus').textContent = t; }
+
+async function initMic() {
+    if (micOn) {
+        if (audioCtx.state !== 'running') await audioCtx.resume();
+        return true;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus(location.protocol === 'file:'
+            ? 'Microphones are blocked when a page is opened as a local file. Open it from the website (https) instead.'
+            : 'This browser or page can\'t use the microphone (it needs https).');
+        return false;
+    }
+    // Created inside the click handler so the browser lets audio run
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+        });
+        await audioCtx.resume();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 1024;
+        audioCtx.createMediaStreamSource(stream).connect(analyser);
+        buf = new Float32Array(analyser.fftSize);
+        micOn = true;
+        return true;
+    } catch (e) {
+        const msgs = {
+            NotAllowedError: 'Microphone access was blocked. Click the 🔒 icon in the address bar, allow the microphone, then try again.',
+            NotFoundError: 'No microphone found. Plug one in and try again.',
+            NotReadableError: 'The microphone is being used by another app.'
+        };
+        setStatus(msgs[e.name] || 'Could not start the microphone: ' + e.message);
+        return false;
+    }
+}
+
+function threshold() { return 0.55 - $('sens').value * 0.0053; } // higher sensitivity = lower threshold
+
+function pollMic(now) {
+    if (!micOn) return;
+    analyser.getFloatTimeDomainData(buf);
+    let peak = 0;
+    for (const v of buf) peak = Math.max(peak, Math.abs(v));
+    const t = threshold();
+    $('level').style.width = Math.min(100, peak * 100) + '%';
+    $('thr').style.left = Math.min(100, t * 100) + '%';
+    // clap = loud peak well above recent ambient level, with a cooldown
+    if (peak > t && peak > baseline * 3 && now - lastClap > 350) {
+        lastClap = now;
+        drop();
+    }
+    baseline = baseline * 0.98 + peak * 0.02;
+}
+
+$('start').onclick = async () => {
+    setStatus('');
+    const ok = await initMic();
+    if (ok) begin();
+    else $('startNoMic').hidden = false;
+};
+$('startNoMic').onclick = begin;
+addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); drop(); } });
+cv.addEventListener('pointerdown', drop);
+
+// ---- loop ----
+let prev = performance.now();
+function frame(now) {
+    const dt = Math.min(0.05, (now - prev) / 1000);
+    prev = now;
+    pollMic(now);
+    if (state === 'play' && cur) {
+        cur.x -= speed * dt;
+        if (cur.x + cur.w < 0) cur.x = W;
+    }
+    for (const f of falling) { f.vy += 1800 * dt; f.y += f.vy * dt; }
+    falling = falling.filter(f => f.y < H * 2);
+    if (tower) {
+        const targetCam = Math.max(0, (tower.length - 6) * BLOCK_H);
+        camY += (targetCam - camY) * Math.min(1, dt * 5);
+    }
+    draw();
+    requestAnimationFrame(frame);
+}
+
+function block(x, y, w, i, a = 1) {
+    ctx.globalAlpha = a;
+    ctx.fillStyle = `hsl(${hue(i)},70%,55%)`;
+    ctx.fillRect(x, y, w, BLOCK_H - 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillRect(x, y, w, 6);
+    ctx.globalAlpha = 1;
+}
+
+function draw() {
+    ctx.fillStyle = '#12172b';
+    ctx.fillRect(0, 0, W, H);
+    if (!tower) return;
+    const baseY = H - 60 + camY;
+    ctx.fillStyle = '#2b3358';
+    ctx.fillRect(0, H - 24 + camY, W, 200);
+    for (const b of tower) block(b.x, baseY - b.i * BLOCK_H, b.w, b.i);
+    for (const f of falling) block(f.x, baseY - f.i * BLOCK_H + f.y, f.w, f.i, 0.8);
+    if (cur) {
+        block(cur.x, baseY - cur.i * BLOCK_H, cur.w, cur.i);
+        const t = tower[tower.length - 1];
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(t.x, 0); ctx.lineTo(t.x, H);
+        ctx.moveTo(t.x + t.w, 0); ctx.lineTo(t.x + t.w, H);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+requestAnimationFrame(frame);

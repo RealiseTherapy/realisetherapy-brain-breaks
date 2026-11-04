@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clap Tower - Brain Breaks</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../" class="back-button">← Back</a>
+            <h1>👏 Clap Tower</h1>
+        </div>
+
+        <div class="hud">
+            <div>Height: <b id="score">0</b></div>
+            <div>Best: <b id="best">0</b></div>
+            <div class="mic">🎤 <span class="meter"><span id="level"></span><span id="thr"></span></span></div>
+            <label>Sensitivity <input id="sens" type="range" min="1" max="100" value="60"></label>
+        </div>
+
+        <div class="stage">
+            <canvas id="c"></canvas>
+            <div id="overlay">
+                <h2 id="title">👏 Clap Tower</h2>
+                <p id="msg">Clap to stop the sliding block. Anything hanging over gets chopped off!</p>
+                <p id="micStatus" class="status"></p>
+                <button id="start">Start (allow microphone)</button>
+                <button id="startNoMic" class="secondary">Play without microphone</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
