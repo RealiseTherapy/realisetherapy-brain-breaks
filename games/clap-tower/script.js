@@ -67,7 +67,7 @@ function spawn() {
 }
 
 function drop() {
-    if (state !== 'play' || !cur) return;
+    if (state !== 'play' || !cur || cur.x >= W) return; // ignore claps while no block is on screen
     const top = tower[tower.length - 1];
     const left = Math.max(cur.x, top.x), right = Math.min(cur.x + cur.w, top.x + top.w);
     if (right - left <= 0) {
@@ -105,14 +105,14 @@ function gameOver() {
 function begin() {
     $('overlay').classList.add('hide');
     music.pause();
-    music.currentTime = 0; loops = 0; lastCT = 0;
+    music.currentTime = 0; loops = 0; lastCT = 0; env = 0;
     reset();
     state = 'play';
     if (musicReady) music.play().catch(() => {});
 }
 
 // ---- microphone ----
-let audioCtx = null, analyser = null, buf = null, micOn = false, lastClap = 0, baseline = 0.01;
+let audioCtx = null, analyser = null, buf = null, micOn = false, lastClap = 0, baseline = 0.01, env = 0;
 
 function setStatus(t) { $('micStatus').textContent = t; }
 
@@ -131,7 +131,7 @@ async function initMic() {
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+            audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false }
         });
         await audioCtx.resume();
         analyser = audioCtx.createAnalyser();
@@ -161,10 +161,14 @@ function pollMic(now) {
     const t = threshold();
     $('level').style.width = Math.min(100, peak * 100) + '%';
     $('thr').style.left = Math.min(100, t * 100) + '%';
-    // clap = loud peak well above recent ambient level, with a cooldown
-    if (peak > t && peak > baseline * 3 && now - lastClap > 350) {
+    // Clap = a spike clearly above the recent loudest level (which includes the music),
+    // so the learned music level is never mistaken for a clap.
+    const isClap = peak > t && peak > env * 1.6 && peak > baseline * 3 && now - lastClap > 350;
+    if (isClap) {
         lastClap = now;
         drop();
+    } else {
+        env = Math.max(peak, env * 0.995);
     }
     baseline = baseline * 0.98 + peak * 0.02;
 }
