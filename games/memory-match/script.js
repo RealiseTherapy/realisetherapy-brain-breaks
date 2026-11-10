@@ -31,6 +31,8 @@ const teamColors = [
     '#7F1D1D'  // maroon
 ];
 
+const teamNames = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Teal', 'Maroon'];
+
 // Each team has its own match sound (synthesised, no audio files needed)
 const teamSounds = [
     { type: 'sine',     notes: [523, 659, 784],       step: 0.12, volume: 0.25 }, // Team 1: bright rising arpeggio
@@ -188,8 +190,8 @@ function updateTeamDisplay() {
     gameState.teams = [];
     gameState.teamScores = {};
 
-    for (let i = 1; i <= teamCount; i++) {
-        const teamName = `Team ${i}`;
+    for (let i = 0; i < teamCount; i++) {
+        const teamName = teamNames[i];
         gameState.teams.push(teamName);
         gameState.teamScores[teamName] = 0;
     }
@@ -239,7 +241,7 @@ function startGame() {
     gameState.matched = [];
     gameState.isProcessing = false;
     gameState.cardTeams = {};
-    gameState.teams = gameState.teams.length ? gameState.teams : ['Team 1', 'Team 2'];
+    gameState.teams = gameState.teams.length ? gameState.teams : teamNames.slice(0, 2);
 
     gameState.teams.forEach(team => {
         gameState.teamScores[team] = 0;
